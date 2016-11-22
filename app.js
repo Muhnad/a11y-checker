@@ -13,7 +13,7 @@ const a11yChecker = function () {
 	  const img = document.getElementsByTagName("img")
 	  for (let i = 0; i < img.length; i++) {
 	    if (!img[i].hasAttribute("alt")) {
-	      console.log(`⚠️ Should add alt to this image:  ${img[i].src}`);
+	      console.log(`⚠️ Should add alt to this image src:  ${img[i].src}`);
 	    }
 	  }
 	})();
@@ -23,6 +23,15 @@ const a11yChecker = function () {
 		if(!header.hasAttribute("role")) {
 			console.log(`⚠️ Should add role=banner to header!`)
 		}
+	})();
+
+	const checkNavRole = (function () {
+	  const nav = document.getElementsByTagName("nav")
+	  for (let i = 0; i < nav.length; i++) {
+	    if (!nav[i].hasAttribute("role")) {
+	      console.log(`⚠️ Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`);
+	    }
+	  }
 	})();
 
 	const checkMainRole = (function () {
@@ -55,7 +64,16 @@ const a11yChecker = function () {
 	      console.log(`⚠️ Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`);
 	    }
 	  }
-	})();		
+	})();	
+
+	const checkFormRole = (function () {
+	  const form = document.getElementsByTagName("form")
+	  for (let i = 0; i < form.length; i++) {
+	    if (!form[i].hasAttribute("role")) {
+	      console.log(`⚠️ Should add role=form to form id: ${form[i].id} & class: ${form[i].className}`);
+	    }
+	  }
+	})();
 
 }
 
