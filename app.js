@@ -1,6 +1,14 @@
 const a11yChecker = function () {
 	"use strict";
 
+	const checkPageTitle = (function () {
+		const pageTitle = document.title;
+		if (pageTitle === null || pageTitle === "") {
+			console.log(`⚠️ Should add title to page!`)
+		}
+
+	})();
+
 	const checkLangAttr = (function () {
 	  const html = document.getElementsByTagName("html")[0];
 	  
