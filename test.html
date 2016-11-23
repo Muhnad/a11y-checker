@@ -1,28 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8">
-	<title></title>
+    <meta charset="utf-8">
+    <title></title>
 
+    <link rel="stylesheet" type="text/css" href="test.css">
 </head>
 <body>
-
 <header>
-	<nav id="main-nav" class="nav-prim"></nav>
+    <nav id="main-nav" class="nav-prim">
+        <ul>
+            <li><a id="skip1" class="skip1" href="">Skip</a></li>
+            <li><a id="skip2" class="skip2">Skip2</a></li>
+        </ul>
+    </nav>
 </header>
 <main>
-	<nav id="sec-nav" class="nav-sec"></nav>
-	<article id="article1" class="article-prim">
-		<img src="#/hi">
-		<form id="form" class="form-prim"></form>
-		<aside class="side-ads" id="side1">
-			<img src="#/advert">
-		</aside>	
-	</article>
+
+<section id="section1" class="section-prim">
+    <nav id="sec-nav" class="nav-sec"></nav>
+    <article id="article1" class="article-prim">
+        <img src="#/hi">    
+    </article>
+    <aside class="side-ads" id="side1">
+        <img src="#/advert">
+    </aside>    
+    <form id="form" class="form-prim">
+        <label>your name</label>
+        <input type="text" placeholder="your name" id="form-name">
+        <input type="submit">
+    </form>    
+</section>  
 </main>
-
-<footer id="footer"></footer>
-
+<button id="btn" class="ele" tabindex="2">hello</button>
 
 <script type="text/javascript" src="app.js"></script>
 </body>
