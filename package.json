@@ -1,0 +1,27 @@
+{
+  "name": "a11y-checker",
+  "version": "1.0.0",
+  "description": "Identifies accessibility issues in your code.",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Muhnad/a11y-checker.git"
+  },
+  "keywords": [
+    "a11y",
+    "accessibility",
+    "developers",
+    "tool",
+    "testing",
+    "report"
+  ],
+  "author": "Muhannad Abdelrazek",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Muhnad/a11y-checker/issues"
+  },
+  "homepage": "https://github.com/Muhnad/a11y-checker#readme"
+}

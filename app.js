@@ -4,19 +4,21 @@ const a11yChecker = function () {
     const checkPageTitle = (function () {
         const pageTitle = document.title;
         if (pageTitle === null || pageTitle === "") {
-            console.log(`⚠️ Should add title to page!`)
+            console.log(`⚠️ Should add title to describe the page content!`)
         }
     })();
 
     const checkLangAttr = (function () {
         const html = document.getElementsByTagName("html")[0];
-        if (html.hasAttribute("lang")) {
-            const htmlLang = html.getAttribute("lang");
-            if (htmlLang === null || htmlLang === "") {
+        if (html) {
+            if (html.hasAttribute("lang")) {
+                const htmlLang = html.getAttribute("lang");
+                if (htmlLang === null || htmlLang === "") {
+                    console.log(`⚠️ Should add lang attribute to html element!`);
+                }
+            } else {
                 console.log(`⚠️ Should add lang attribute to html element!`);
             }
-        } else {
-            console.log(`⚠️ Should add lang attribute to html element!`);
         }
     })();
 
@@ -54,13 +56,15 @@ const a11yChecker = function () {
 
     const checkHeaderRole = (function () {
         const header = document.getElementsByTagName("header")[0];
-        if (header.hasAttribute("role")) {
-            const headerRole = header.getAttribute("role");
-            if (headerRole !== "banner") {
+        if (header) {
+            if (header.hasAttribute("role")) {
+                const headerRole = header.getAttribute("role");
+                if (headerRole !== "banner") {
+                    console.log(`⚠️ Should add role=banner to header!`);
+                }
+            } else {
                 console.log(`⚠️ Should add role=banner to header!`);
             }
-        } else {
-            console.log(`⚠️ Should add role=banner to header!`);
         }
     })();
 
@@ -80,25 +84,29 @@ const a11yChecker = function () {
 
     const checkMainRole = (function () {
         const main = document.getElementsByTagName("main")[0];
-        if (main.hasAttribute("role")) {
-            const mainRole = main.getAttribute("role");
-            if (mainRole !== "main") {
+        if (main) {
+            if (main.hasAttribute("role")) {
+                const mainRole = main.getAttribute("role");
+                if (mainRole !== "main") {
+                    console.log(`⚠️ Should add role=main to main!`);
+                }
+            } else {
                 console.log(`⚠️ Should add role=main to main!`);
             }
-        } else {
-            console.log(`⚠️ Should add role=main to main!`);
         }
     })();
 
     const checkFooterRole = (function () {
         const footer = document.getElementsByTagName("footer")[0];
-        if (footer.hasAttribute("role")) {
-            const footerRole = footer.getAttribute("role");
-            if (footerRole !== "contentinfo") {
+        if (footer) {
+            if (footer.hasAttribute("role")) {
+                const footerRole = footer.getAttribute("role");
+                if (footerRole !== "contentinfo") {
+                    console.log(`⚠️ Should add role=contentinfo to footer!`);
+                }
+            } else {
                 console.log(`⚠️ Should add role=contentinfo to footer!`);
             }
-        } else {
-            console.log(`⚠️ Should add role=contentinfo to footer!`);
         }
     })();
 
@@ -163,6 +171,44 @@ const a11yChecker = function () {
             }
             if (!form[i].hasAttribute("aria-labelledby")) {
                 console.log(`⚠️ Should add aria-labelledby to form id: ${form[i].id} & class: ${form[i].className}`);
+            }
+        }
+    })();
+
+    const checkLabelRole = (function () {
+        const label = document.getElementsByTagName("label");
+        for (let i = 0; i < label.length; i++) {
+            const labelChildLeng = label[i].children.length;
+            if (labelChildLeng === 0 || labelChildLeng >= 2) {
+                if (label[i].hasAttribute("for")) {
+                    const labelRole = label[i].getAttribute("for");
+                    if (labelRole === null || labelRole === "") {
+                        console.log(`⚠️ Should add for=value to label: ${label[i].innerHTML}`);
+                    }
+                } else {
+                    console.log(`⚠️ Should add for=value to label: ${label[i].innerHTML}`);
+                }
+            }
+        }
+    })();
+
+    const checkPlaceholder = (function () {
+        const input = document.getElementsByTagName("input");
+        for (let i = 0; i < input.length; i++) {
+            if (input[i].hasAttribute("placeholder")) {
+                console.log(`⚠️ the placeholder is not guaranteed to be read by assisitive technologies, should include aria-label OR label for element. \n placeholder: ${input[i].placeholder} & id: ${input[i].id}`);
+            }
+        }
+    })();
+
+    const checkTabindexVal = (function () {
+        const allElements = document.querySelectorAll("*");
+        for (let i = 0; i < allElements.length; i++) {
+            if (allElements[i].hasAttribute("tabindex")) {
+                const tabIndexVal = allElements[i].getAttribute("tabindex");
+                if (tabIndexVal >= 1) {
+                    console.log(`Avoid using positive integer values for tabindex id: ${allElements[i].id} & class: ${allElements[i].className}`)
+                }
             }
         }
     })();
