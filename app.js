@@ -1,13 +1,6 @@
 const a11yChecker = function () {
     "use strict";
-
-    const checkPageTitle = (function () {
-        const pageTitle = document.title;
-        if (pageTitle === null || pageTitle === "") {
-            console.log(`⚠️ Should add title to describe the page content!`)
-        }
-    })();
-
+    
     const checkLangAttr = (function () {
         const html = document.getElementsByTagName("html")[0];
         if (html) {
@@ -22,11 +15,19 @@ const a11yChecker = function () {
         }
     })();
 
+    const checkPageTitle = (function () {
+        const pageTitle = document.title;
+        if (pageTitle === null || pageTitle === "") {
+            console.log(`⚠️ Should add title to describe the page content!`)
+        }
+    })();
+
     const checkPrintStyle = (function () {
         const link = document.getElementsByTagName("link");
         for (let i = 0; i < link.length; i++) {
-            if (link[i].hasAttribute("media")) {
-                if (link[i].getAttribute("media") !== "print") {
+            if (link[i].hasAttribute("media") >= 0) {
+                const linkMedia = link[i].getAttribute("media");
+                if (linkMedia !== "print") {
                     console.log(`⚠️ Should add print style file to document.`);
                 }
             } else {
