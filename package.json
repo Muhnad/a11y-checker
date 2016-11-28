@@ -2,7 +2,7 @@
   "name": "a11y-checker",
   "version": "1.0.0",
   "description": "Identifies accessibility issues in your code.",
-  "main": "app.js",
+  "main": "a11y.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

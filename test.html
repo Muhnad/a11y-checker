@@ -3,37 +3,55 @@
 <head>
     <meta charset="utf-8">
     <title></title>
-
     <link rel="stylesheet" type="text/css" href="test.css">
 </head>
 <body>
 <header>
+    <h1>A11y checkers</h1>
     <nav id="main-nav" class="nav-prim">
         <ul>
-            <li><a id="skip1" class="skip1" href="">Skip</a></li>
-            <li><a id="skip2" class="skip2">Skip2</a></li>
+            <li><a id="skip1" class="skip1" href="">skip</a></li>
+            <li><a id="skip2" class="skip2" target="_blank" href="example.com">More</a></li>
         </ul>
     </nav>
 </header>
 <main>
 <section id="section1" class="section-prim">
-    <nav id="sec-nav" class="nav-sec"></nav>
+    <h1>accessability checkers!</h1>
+    <nav id="sec-nav" class="nav-sec">
+        <button id="btn-prim" class="btn-prim"></button>
+        <ul>
+            <li>a11y rule 1</li>
+            <li>a11y rule 2</li>
+        </ul>
+    </nav>
     <article id="article1" class="article-prim">
-        <img src="#/hi">    
+        <abbr title="" id="a11y">A11y</abbr>
+        <figure id="figure-prim">
+            <img src="#/hi">    
+         </figure>   
     </article>
     <aside class="side-ads" id="side1">
-        <img src="#/advert">
+        <img src="" id="side-img" class="ads-img">
     </aside>    
     <form id="form" class="form-prim">
         <label>your name</label>
-        <input type="text" placeholder="your name" id="form-name">
-        <input type="submit">
-    </form>    
+        <input placeholder="your name" id="form-name">
+        <input type="submit" value="submit" id="form-submit">
+        <input type="reset" id="form-reset">
+    </form>  
+    <iframe src="" id="frame"></iframe>
+    <button id="btn" class="ele" tabindex="2">hello</button>
+    <select>
+        <optgroup>
+            <option>one</option>
+            <option>two</option>
+        </optgroup>       
+    </select>
 </section>  
 </main>
 <footer id="footer" class="footer-prim"></footer>
-<button id="btn" class="ele" tabindex="2">hello</button>
 
-<script type="text/javascript" src="app.js"></script>
+<script type="text/javascript" src="a11y.js"></script>
 </body>
 </html>
