@@ -54,9 +54,11 @@ const a11yChecker = function () {
     })();
 
     const checkLinks = (function () {
-        const anchor = document.getElementsByTagName("a");
+        const anchor = document.getElementsByTagName("a"),
+              listCommonWords = ["more", "click", "click here", "continue", "skip", "go", "here"];
         for (let i = 0; i < anchor.length; i++) {
-            const anchorHref = anchor[i].getAttribute("href");
+            const anchorText = anchor[i].textContent.toLowerCase(),
+                  anchorHref = anchor[i].getAttribute("href");
             if (anchorHref === null || anchorHref === "") {
                 console.log(`⚠️ Should add href=value to anchor tag id: ${anchor[i].id} & class: ${anchor[i].className}`);
             }            
@@ -64,6 +66,15 @@ const a11yChecker = function () {
                 const anchorTarget = anchor[i].getAttribute("target");
                 if (anchorTarget === "_blank") {
                      console.log(`⚠️ Should add alert to identify this link will open in new tab id: ${anchor[i].id} & src: ${anchor[i].href}`)
+                }
+            }
+            if (listCommonWords.indexOf(anchorText) >= 0) {
+                console.log(`⚠️ Should link have a meaningful to explain where the link goes! link text: ${anchor[i].textContent} & href: ${anchor[i].href}`)
+            }      
+            if (anchor[i].hasAttribute("target")) {
+                const anchorTarget = anchor[i].getAttribute("target");
+                if (anchorTarget === "_blank") {
+                     console.log(`⚠️ Should add alert to recognize this link will open in new tab. src: ${anchor[i].href}`)
                 }
             }
         }
@@ -183,6 +194,9 @@ const a11yChecker = function () {
                 }
             } else {
                 console.log(`⚠️ Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
+            }
+            if (!figure[i].hasAttribute("aria-labelledby")) {
+                console.log(`⚠️ Should add aria-labelledby to figure id: ${figure[i].id} & class: ${figure[i].className}`);
             }
         }
     })();
