@@ -1,5 +1,5 @@
 # a11y checker
-warn about HTML Markup code accessiability issue
+Warn about HTML Markup code accessiability issue
 ![a11y](a11y.png?raw=true "a11y")
 
 ## Installation
