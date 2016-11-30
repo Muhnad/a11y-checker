@@ -346,4 +346,4 @@ const a11yChecker = function () {
     })();
 }
 
-window.onload = a11yChecker()
+a11yChecker()
