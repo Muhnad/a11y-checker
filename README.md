@@ -1,8 +1,11 @@
 # a11y checker
-warn about HTML Markup code accessiability issue
+
+Warn about HTML Markup code accessiability issue.
 ![a11y](a11y.png?raw=true "a11y")
 
+
 ## Installation
+
 First, Download the `a11y.js`
 
 Second, include it before `</body>`
@@ -13,6 +16,18 @@ Second, include it before `</body>`
 
 OR 
 
-``` javascript
-	npm install a11y-checker
+```sh
+$ npm install a11y-checker
 ```
+
+
+## Usage
+
+```js
+var a11yChecker = require("a11y-checker");
+```
+
+
+## License
+
+MIT
