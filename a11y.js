@@ -1,6 +1,6 @@
 const a11yChecker = function () {
     "use strict";
-    
+
     const checkLangAttr = (function () {
         const html = document.getElementsByTagName("html")[0];
         if (html) {
@@ -12,6 +12,17 @@ const a11yChecker = function () {
             } else {
                 console.log(`⚠️ Should add lang attribute to html element!`);
             }
+        }
+    })();
+
+    const checkMeta = (function () {
+        const metaCharset = document.getElementsByTagName("meta")[0];
+        if (metaCharset) {
+            if (!metaCharset.hasAttribute("charset")) {
+                console.log(`⚠️ Should add meta charset=utf-8 to document!`);
+            }
+        } else {
+            console.log(`⚠️ Should add meta charset=utf-8 to document!`);
         }
     })();
 
@@ -36,6 +47,14 @@ const a11yChecker = function () {
         }
     })();
 
+    const checkHeading = (function () {
+        const heading = document.getElementsByTagName("h1"),
+              headingLength = heading.length;
+        if (headingLength > 1) {
+            console.log(`⚠️ Should h1 exist in page once usually in logo!`)
+        }
+    })();
+
     const checkImages = (function () {
         const img = document.getElementsByTagName("img");
         for (let i = 0; i < img.length; i++) {
@@ -55,29 +74,29 @@ const a11yChecker = function () {
 
     const checkLinks = (function () {
         const anchor = document.getElementsByTagName("a"),
-              listCommonWords = ["more", "click", "click here", "continue", "skip", "go", "here"];
+              firstAnchor = anchor[0],
+              firstAnchorText = firstAnchor.textContent.toLowerCase(),
+              listCommonWords = ["more", "click", "click here", "continue", "go", "here"],
+              listSkipWords = ["skip navigation", "skip nav", "skip to navigation", "skip main navigation", "skip to content", "skip to main content","skip to search"];
+        if (listSkipWords.indexOf(firstAnchorText) < 0) {
+            console.log(`⚠️ Should add skip to main content link!`)
+        }
         for (let i = 0; i < anchor.length; i++) {
             const anchorText = anchor[i].textContent.toLowerCase(),
                   anchorHref = anchor[i].getAttribute("href");
             if (anchorHref === null || anchorHref === "") {
                 console.log(`⚠️ Should add href=value to anchor tag id: ${anchor[i].id} & class: ${anchor[i].className}`);
-            }            
-            if (anchor[i].hasAttribute("target")) {
-                const anchorTarget = anchor[i].getAttribute("target");
-                if (anchorTarget === "_blank") {
-                     console.log(`⚠️ Should add alert to identify this link will open in new tab id: ${anchor[i].id} & src: ${anchor[i].href}`)
-                }
             }
             if (listCommonWords.indexOf(anchorText) >= 0) {
-                console.log(`⚠️ Should link have a meaningful to explain where the link goes! link text: ${anchor[i].textContent} & href: ${anchor[i].href}`)
-            }      
+                console.log(`⚠️ Should link have a meaningful text to explain where the link goes! link text: ${anchor[i].textContent} & href: ${anchor[i].href}`)
+            }                  
             if (anchor[i].hasAttribute("target")) {
                 const anchorTarget = anchor[i].getAttribute("target");
                 if (anchorTarget === "_blank") {
                      console.log(`⚠️ Should add alert to recognize this link will open in new tab. src: ${anchor[i].href}`)
                 }
             }
-        }
+        }   
     })();
 
     const checkHeaderRole = (function () {
@@ -272,6 +291,16 @@ const a11yChecker = function () {
                 }                
             } else {
                 console.log(`⚠️ Should add src to iframe id: ${iframe[i].id}`);
+            }
+        }
+    })();
+
+    const checkButtons = (function () {
+        const btn = document.getElementsByTagName("button");
+        for (let i = 0; i < btn.length; i++) {
+            const btnText = btn[i].textContent;
+            if (btnText === null || btnText === "") {
+                console.log(`⚠️ Should add text to button id: ${btn[i].id} & class ${btn[i].className}`);
             }
         }
     })();
