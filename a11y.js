@@ -346,4 +346,4 @@ const a11yChecker = function () {
     })();
 }
 
-a11yChecker()
+a11yChecker();
