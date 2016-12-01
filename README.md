@@ -14,20 +14,6 @@ Second, include it before `</body>`
 <script src="a11y.js"></script>
 ```
 
-OR 
-
-```sh
-$ npm install a11y-checker
-```
-
-
-## Usage
-
-```js
-var a11yChecker = require("a11y-checker");
-```
-
-
 ## License
 
 MIT
