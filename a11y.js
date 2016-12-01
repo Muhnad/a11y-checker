@@ -344,6 +344,18 @@ const a11yChecker = function () {
             }
         }
     })();
+
+    const checkClickEvnt = (function () {
+      const allElemetns = document.getElementsByTagName("*");
+      for (let i = 0; i < allElemetns.length; i++) {
+        if (allElemetns[i].hasAttribute("onclick") || allElemetns[i].hasAttribute("onClick")) {
+          if (!allElemetns[i].hasAttribute("tabindex")) {
+            console.log(`⚠️ Please add tabindex to element id: ${allElemetns[i].id} & class: ${allElemetns[i].className}`)
+          }
+        }
+      }
+    })();
+
 }
 
 a11yChecker()
