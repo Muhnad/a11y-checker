@@ -3,6 +3,18 @@ const a11yChecker = () =>
 
   const getElement = (element) => document.getElementsByTagName(element)
   
+  const checkDoctype = (() => {
+    const doctype = document.doctype;
+    if (doctype) {
+      const doctypeName = doctype.name;
+      if (doctypeName.toLowerCase() !== 'html') {
+        console.log('⚠️ Should add doctype to document!');
+      }
+    } else {
+      console.log('⚠️ Should add doctype to document!');
+    }
+  })();
+  
   const checkLangAttr = (() => {
       const html = getElement('html')[0];
       if (html) {
@@ -92,7 +104,7 @@ code: ${img[i].outerHTML}`);
       for (let i = 0; i < anchor.length; i++) {
           const anchorText = anchor[i].textContent.toLowerCase();
           const anchorHref = anchor[i].getAttribute('href');
-          const listCommonWords = ['more', 'click', 'click here', 'continue', 'go', 'here'];
+          const listCommonWords = ['more', 'click', 'click here', 'continue', 'go', 'here', 'open link', 'open'];
           
           if (anchorHref === null || anchorHref === '') {
               console.log(`⚠️ Should add href=value to anchor tag.
