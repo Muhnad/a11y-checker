@@ -3,6 +3,18 @@ const a11yChecker = () =>
 
   const getElement = (element) => document.getElementsByTagName(element)
   
+  const checkDoctype = (function () {
+    const doctype = document.doctype;
+    if (doctype) {
+      const doctypeName = doctype.name;
+      if (doctypeName.toLowerCase() !== 'html') {
+        console.log('⚠️ Should add doctype to document!');
+      }
+    } else {
+      console.log('⚠️ Should add doctype to document!');
+    }
+  })();
+
   const checkLangAttr = (() => {
       const html = getElement('html')[0];
       if (html) {
