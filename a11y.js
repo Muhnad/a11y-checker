@@ -8,10 +8,10 @@ const a11yChecker = () =>
     if (doctype) {
       const doctypeName = doctype.name;
       if (doctypeName.toLowerCase() !== 'html') {
-        console.log('⚠️ Should add doctype to document!');
+        console.warn('Should add doctype to document!');
       }
     } else {
-      console.log('⚠️ Should add doctype to document!');
+      console.warn('Should add doctype to document!');
     }
   })();
   
@@ -21,10 +21,10 @@ const a11yChecker = () =>
           if (html.hasAttribute('lang')) {
               const htmlLang = html.getAttribute('lang');
               if (htmlLang === null || htmlLang === '') {
-                  console.log('⚠️ Should add lang=value attribute to html element!');
+                  console.warn('Should add lang=value attribute to html element!');
               }
           } else {
-              console.log('⚠️ Should add lang attribute to html element!');
+              console.warn('Should add lang attribute to html element!');
           }
       }
   })();
@@ -33,17 +33,17 @@ const a11yChecker = () =>
       const metaCharset = getElement('meta')[0];
       if (metaCharset) {
           if (!metaCharset.hasAttribute('charset')) {
-              console.log('⚠️ Should add meta charset=utf-8 to document!');
+              console.warn('Should add meta charset=utf-8 to document!');
           }
       } else {
-          console.log('⚠️ Should add meta charset=utf-8 to document!');
+          console.warn('Should add meta charset=utf-8 to document!');
       }
   })();
 
   const checkPageTitle = (() => {
       const pageTitle = document.title;
       if (pageTitle === null || pageTitle === '') {
-          console.log('⚠️ Should add title to describe the page content!')
+          console.warn('Should add title to describe the page content!')
       }
   })();
 
@@ -53,10 +53,10 @@ const a11yChecker = () =>
           if (link[i].hasAttribute('media') >= 0) {
               const linkMedia = link[i].getAttribute('media');
               if (linkMedia !== 'print') {
-                  console.log('⚠️ Should add print style file to document.');
+                  console.warn('Should add print style file to document.');
               }
           } else {
-              console.log('⚠️ Should add print style file to document.');
+              console.warn('Should add print style file to document.');
           }
       }
   })();
@@ -65,7 +65,7 @@ const a11yChecker = () =>
       const heading = getElement('h1');
       const headingLength = heading.length;
       if (headingLength > 1) {
-          console.log('⚠️ Should h1 exist in page once usually in logo!')
+          console.warn('Should h1 exist in page once usually in warno!')
       }
   })();
 
@@ -75,15 +75,15 @@ const a11yChecker = () =>
           if (img[i].hasAttribute('src')) {
               const imgSrc = img[i].getAttribute('src');
               if (imgSrc === null || imgSrc === '') {
-                  console.log(`⚠️ Should add src=value to the image.
+                  console.warn(`Should add src=value to the image.
 code: ${img[i].outerHTML}`);
               }
               if (!img[i].hasAttribute('alt')) {
-                  console.log(`⚠️ Should add alt to the image.
+                  console.warn(`Should add alt to the image.
 code: ${img[i].outerHTML}`);
               }                
          } else {
-          console.log(`⚠️ Should add src to the image.
+          console.warn(`Should add src to the image.
 code: ${img[i].outerHTML}`);
          }            
       }
@@ -97,7 +97,7 @@ code: ${img[i].outerHTML}`);
       if (firstAnchor) {
         const firstAnchorText = firstAnchor.textContent.toLowerCase();        
           if (listSkipWords.indexOf(firstAnchorText) < 0) {
-              console.log('⚠️ Should add skip to main content link!')
+              console.warn('Should add skip to main content link!')
           }
       }
 
@@ -107,12 +107,12 @@ code: ${img[i].outerHTML}`);
           const listCommonWords = ['more', 'click', 'click here', 'continue', 'go', 'here', 'open link', 'open'];
           
           if (anchorHref === null || anchorHref === '') {
-              console.log(`⚠️ Should add href=value to anchor tag.
+              console.warn(`Should add href=value to anchor tag.
 code: ${anchor[i].outerHTML}`);
           }
           
           if (listCommonWords.indexOf(anchorText) >= 0) {
-              console.log(`⚠️ Should link have a meaningful text to explain where the link goes!
+              console.warn(`Should link have a meaningful text to explain where the link goes!
 code: ${anchor[i].outerHTML}`)
           }                  
           
@@ -120,9 +120,9 @@ code: ${anchor[i].outerHTML}`)
               const anchorTarget = anchor[i].getAttribute('target');
               if (anchorTarget === '_blank') {
                   if (!anchor[i].hasAttribute('aria-describedby')) {
-                   console.log(`⚠️ Should add alert to recognize this link will open in new tab.
-code: ${anchor[i].outerHTML}`)
-              }   
+                   console.warn(`Should add alert to recognize this link will open in new tab.
+code: ${anchor[i].outerHTML}`);
+              }             
             }
           }
       }
@@ -134,10 +134,10 @@ code: ${anchor[i].outerHTML}`)
           if (header.hasAttribute('role')) {
               const headerRole = header.getAttribute('role');
               if (headerRole !== 'banner') {
-                  console.log('⚠️ Should add role=banner to header!');
+                  console.warn('Should add role=banner to header!');
               }
           } else {
-              console.log('⚠️ Should add role=banner to header!');
+              console.warn('Should add role=banner to header!');
           }
       }
   })();
@@ -148,13 +148,13 @@ code: ${anchor[i].outerHTML}`)
           if (nav[i].hasAttribute('role')) {
               const navRole = nav[i].getAttribute('role');
               if (navRole !== 'navigation') {
-                  console.log(`⚠️ Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`);
+                  console.warn(` Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`);
               }
           } else {
-              console.log(`⚠️ Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`);
+              console.warn(` Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`);
           }
           if (!nav[i].hasAttribute('aria-label')) {
-              console.log(`⚠️ Should add aria-label to nav id: ${nav[i].id} & class: ${nav[i].className}`);
+              console.warn(`Should add aria-label to nav id: ${nav[i].id} & class: ${nav[i].className}`);
           }            
       }
   })();
@@ -165,10 +165,10 @@ code: ${anchor[i].outerHTML}`)
           if (main.hasAttribute('role')) {
               const mainRole = main.getAttribute('role');
               if (mainRole !== 'main') {
-                  console.log('⚠️ Should add role=main to main!');
+                  console.warn('Should add role=main to main!');
               }
           } else {
-              console.log('⚠️ Should add role=main to main!');
+              console.warn('Should add role=main to main!');
           }
       }
   })();
@@ -179,10 +179,10 @@ code: ${anchor[i].outerHTML}`)
           if (footer.hasAttribute('role')) {
               const footerRole = footer.getAttribute('role');
               if (footerRole !== 'contentinfo') {
-                  console.log('⚠️ Should add role=contentinfo to footer!');
+                  console.warn('Should add role=contentinfo to footer!');
               }
           } else {
-              console.log('⚠️ Should add role=contentinfo to footer!');
+              console.warn('Should add role=contentinfo to footer!');
           }
       }
   })();
@@ -193,13 +193,13 @@ code: ${anchor[i].outerHTML}`)
           if (section[i].hasAttribute('role')) {
               const sectionRole = section[i].getAttribute('role');
               if (sectionRole !== 'region') {
-                  console.log(`⚠️ Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
+                  console.warn(`Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
               }
           } else {
-              console.log(`⚠️ Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
+              console.warn(`Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
           }
           if (!section[i].hasAttribute('aria-labelledby')) {
-              console.log(`⚠️ Should add aria-labelledby to section id: ${section[i].id} & class: ${section[i].className}`);
+              console.warn(`Should add aria-labelledby to section id: ${section[i].id} & class: ${section[i].className}`);
           }
       }
   })();
@@ -210,10 +210,10 @@ code: ${anchor[i].outerHTML}`)
           if (article[i].hasAttribute('role')) {
               const articleRole = article[i].getAttribute('role');
               if (articleRole !== 'article') {
-                  console.log(`⚠️ Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
+                  console.warn(`Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
               }
           } else {
-              console.log(`⚠️ Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
+              console.warn(`Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
           }
       }
   })();
@@ -224,13 +224,13 @@ code: ${anchor[i].outerHTML}`)
           if (aside[i].hasAttribute('role')) {
               const asideRole = aside[i].getAttribute('role');
               if (asideRole !== 'complementary') {
-                  console.log(`⚠️ Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`);
+                  console.warn(`Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`);
               }
           } else {
-              console.log(`⚠️ Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`);
+              console.warn(`Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`);
           }
           if (!aside[i].hasAttribute('aria-labelledby')) {
-              console.log(`⚠️ Should add aria-labelledby to aside id: ${aside[i].id} & class: ${aside[i].className}`);
+              console.warn(`Should add aria-labelledby to aside id: ${aside[i].id} & class: ${aside[i].className}`);
           }
       }
   })();
@@ -241,13 +241,13 @@ code: ${anchor[i].outerHTML}`)
           if (figure[i].hasAttribute('role')) {
               const figureRole = figure[i].getAttribute('role');
               if (figureRole !== 'group') {
-                  console.log(`⚠️ Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
+                  console.warn(`Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
               }
           } else {
-              console.log(`⚠️ Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
+              console.warn(`Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
           }
           if (!figure[i].hasAttribute('aria-labelledby')) {
-              console.log(`⚠️ Should add aria-labelledby to figure id: ${figure[i].id} & class: ${figure[i].className}`);
+              console.warn(`Should add aria-labelledby to figure id: ${figure[i].id} & class: ${figure[i].className}`);
           }
       }
   })();
@@ -257,16 +257,16 @@ code: ${anchor[i].outerHTML}`)
       for (let i = 0; i < form.length; i++) {
           if (form[i].hasAttribute('role')) {
               const formRole = form[i].getAttribute('role');
-              if (formRole !== 'form' && formRole !== 'search') {
-                  console.log(`⚠️ Should add role=form OR role=search
+              if (formRole !== 'form'&& formRole !== 'search') {
+                  console.warn(`Should add role=form OR role=search
 code: ${form[i].outerHTML}`);
               }
           } else {
-              console.log(`⚠️ Should add role=form OR role=search
+              console.warn(`Should add role=form OR role=search
 code: ${form[i].outerHTML}`);
           }
           if (!form[i].hasAttribute('aria-labelledby')) {
-              console.log(`⚠️ Should add aria-labelledby to form
+              console.warn(`Should add aria-labelledby to form
 code: ${form[i].outerHTML}`);
           }
       }
@@ -280,10 +280,10 @@ code: ${form[i].outerHTML}`);
               if (label[i].hasAttribute('for')) {
                   const labelRole = label[i].getAttribute('for');
                   if (labelRole === null || labelRole === '') {
-                      console.log(`⚠️ Should add for=value to label: ${label[i].outerHTML}`);
+                      console.warn(`Should add for=value to label: ${label[i].outerHTML}`);
                   }
               } else {
-                  console.log(`⚠️ Should add for=value to label: ${label[i].outerHTML}`);
+                  console.warn(`Should add for=value to label: ${label[i].outerHTML}`);
               }
           }
       }
@@ -294,18 +294,18 @@ code: ${form[i].outerHTML}`);
       for (let i = 0; i < input.length; i++) {
           if (input[i].hasAttribute('type')) {
              const inputTypeVal = input[i].getAttribute('type');
-             if (inputTypeVal === 'submit' || inputTypeVal === 'reset') {
+             if (inputTypeVal === 'submit'|| inputTypeVal === 'reset') {
                if (!input[i].hasAttribute('value')) {
-                  console.log(`⚠️ Should Add value=value to input
+                  console.warn(`Should Add value=value to input
 code: ${input[i].outerHTML}`);
                }
              }
           } else {
-              console.log(`⚠️ Should Add type=value to input
+              console.warn(`Should Add type=value to input
 code: ${input[i].outerHTML}`); 
           }
           if (input[i].hasAttribute('placeholder')) {
-              console.log(`⚠️ the placeholder is not guaranteed to be read by assisitive technologies, should include aria-label OR label for element.
+              console.warn(`the placeholder is not guaranteed to be read by assisitive technowarnies, should include aria-label OR label for element.
 code: ${input[i].outerHTML}`);
           }
       }
@@ -317,21 +317,21 @@ code: ${input[i].outerHTML}`);
           if (iframe[i].hasAttribute('src')) {
               const iframeSrc = iframe[i].getAttribute('src');
               if (iframeSrc === null || iframeSrc === '') {
-                  console.log(`⚠️ Should add src=value to iframe
+                  console.warn(`Should add src=value to iframe
 code: ${iframe[i].outerHTML}`);
               }
               if (iframe[i].hasAttribute('title')) {
                   const iframeTitle = iframe[i].getAttribute('title');
                   if (iframeTitle === null || iframeTitle === '') {
-                      console.log(`⚠️ Should add title=value to iframe
+                      console.warn(`Should add title=value to iframe
 code: ${iframe[i].outerHTML}`);
                   }
               } else {
-                  console.log(`⚠️ Should add title to iframe
+                  console.warn(`Should add title to iframe
 code: ${iframe[i].outerHTML}`);
               }                
           } else {
-              console.log(`⚠️ Should add src to iframe
+              console.warn(`Should add src to iframe
 code: ${iframe[i].outerHTML}`);
           }
       }
@@ -342,7 +342,7 @@ code: ${iframe[i].outerHTML}`);
       for (let i = 0; i < btn.length; i++) {
           const btnText = btn[i].textContent;
           if (btnText === null || btnText === '') {
-              console.log(`⚠️ Should add text to button
+              console.warn(`Should add text to button
 code: ${btn[i].outerHTML}`);
           }
       }
@@ -354,11 +354,11 @@ code: ${btn[i].outerHTML}`);
           if (abbr[i].hasAttribute('title')) {
               const abbrTitle = abbr[i].getAttribute('title');
               if (abbrTitle === null || abbrTitle === '') {
-                  console.log(`⚠️ Should add title=value to abbr 
+                  console.warn(`Should add title=value to abbr 
 code: ${abbr[i].outerHTML}`);
               }
           } else {
-              console.log(`⚠️ Should add title to abbr 
+              console.warn(`Should add title to abbr 
 code: ${abbr[i].outerHTML}`)
           }
       }
@@ -370,11 +370,11 @@ code: ${abbr[i].outerHTML}`)
           if (optgroup[i].hasAttribute('label')) {
               const optLabel = optgroup[i].getAttribute('label');
               if (optLabel === null || optLabel === '') {
-                  console.log(`⚠️ Should add label=value to optgroup
+                  console.warn(`Should add label=value to optgroup
 code: ${optgroup[i].outerHTML}`);
               }
           } else {
-              console.log(`⚠️ Should add label to optgroup
+              console.warn(`Should add label to optgroup
 code: ${optgroup[i].outerHTML}`);
           }
       }
@@ -386,7 +386,7 @@ code: ${optgroup[i].outerHTML}`);
           if (allElements[i].hasAttribute('tabindex')) {
               const tabIndexVal = allElements[i].getAttribute('tabindex');
               if (tabIndexVal >= 1) {
-                  console.log(`⚠️ Avoid using positive integer values for tabindex
+                  console.warn(`Avoid using positive integer values for tabindex
 code: ${allElements[i].outerHTML}`)
               }
           }
@@ -398,10 +398,10 @@ code: ${allElements[i].outerHTML}`)
     for (let i = 0; i < allElement.length; i++) {
       if (allElement[i].hasAttribute('onclick') || allElement[i].hasAttribute('onClick')) {
         if (!allElement[i].hasAttribute('tabindex')) {
-          console.log(`⚠️ Please add tabindex to element id: ${allElement[i].id} & class: ${allElement[i].className}`)
+          console.warn(`Please add tabindex to element id: ${allElement[i].id} & class: ${allElement[i].className}`)
         }
       }
     }
-  })();
+  })();  
 
 window.addEventListener('load', a11yChecker);
