@@ -122,7 +122,17 @@ code: ${anchor[i].outerHTML}`)
                   if (!anchor[i].hasAttribute('aria-describedby')) {
                    console.warn(`Should add alert to recognize this link will open in new tab.
 code: ${anchor[i].outerHTML}`);
-              }             
+              }
+                if (anchor[i].hasAttribute('rel')) {
+                  const anchorRel = anchor[i].getAttribute('rel');
+                  if (anchorRel !== 'noopener') {
+                    console.warn(`Should add rel=noopener to 
+code:${anchor[i].outerHTML}`);
+                  }
+                } else {
+                  console.warn(`Should add rel=noopener to
+code: ${anchor[i].outerHTML}`);
+                }              
             }
           }
       }
