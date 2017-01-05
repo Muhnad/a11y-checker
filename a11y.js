@@ -1,4 +1,4 @@
-const a11yChecker = () =>
+const a11yChecker = () => {
   'use strict';
 
   const getElement = (element) => document.getElementsByTagName(element)
@@ -50,6 +50,8 @@ const a11yChecker = () =>
   const checkPrintStyle = (() => {
       const link = getElement('link');
       for (let i = 0; i < link.length; i++) {
+        const linkStylesheet = link[i].getAttribute('rel');
+        if (linkStylesheet === 'stylesheet') {
           if (link[i].hasAttribute('media') >= 0) {
               const linkMedia = link[i].getAttribute('media');
               if (linkMedia !== 'print') {
@@ -59,6 +61,7 @@ const a11yChecker = () =>
               console.warn('Should add print style file to document.');
           }
       }
+    }
   })();
 
   const checkHeading = (() => {
@@ -119,7 +122,7 @@ code: ${anchor[i].outerHTML}`)
           if (anchor[i].hasAttribute('target')) {
               const anchorTarget = anchor[i].getAttribute('target');
               if (anchorTarget === '_blank') {
-                  if (!anchor[i].hasAttribute('aria-describedby')) {
+                if (!anchor[i].hasAttribute('aria-describedby')) {
                    console.warn(`Should add alert to recognize this link will open in new tab.
 code: ${anchor[i].outerHTML}`);
               }
@@ -132,7 +135,7 @@ code:${anchor[i].outerHTML}`);
                 } else {
                   console.warn(`Should add rel=noopener to
 code: ${anchor[i].outerHTML}`);
-                }              
+                }            
             }
           }
       }
@@ -412,6 +415,6 @@ code: ${allElements[i].outerHTML}`)
         }
       }
     }
-  })();  
-
+  })();
+}
 window.addEventListener('load', a11yChecker);
