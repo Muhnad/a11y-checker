@@ -1,7 +1,8 @@
-const a11yChecker = () => {
-  'use strict';
+'use strict';
 
-  const getElement = (element) => document.getElementsByTagName(element)
+const a11yChecker = () => {
+
+  const getElement = (element) => document.getElementsByTagName(element);
   
   const checkDoctype = (() => {
     const doctype = document.doctype;
