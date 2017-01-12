@@ -319,8 +319,10 @@ code: ${input[i].outerHTML}`);
 code: ${input[i].outerHTML}`); 
           }
           if (input[i].hasAttribute('placeholder')) {
-              console.warn(`the placeholder is not guaranteed to be read by assisitive technowarnies, should include aria-label OR label for element.
+            if (!input[i].hasAttribute('aria-label')) {
+                console.warn(`the placeholder is not guaranteed to be read by assisitive technowarnies, should include aria-label OR label for element.
 code: ${input[i].outerHTML}`);
+            }
           }
       }
   })();
