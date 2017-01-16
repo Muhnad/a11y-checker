@@ -2,7 +2,7 @@
 
 const a11yChecker = () => {
 
-  const getElement = (element) => document.getElementsByTagName(element);
+  const getElement = (element) => document.querySelectorAll(element);
   
   const checkDoctype = (() => {
     const doctype = document.doctype;
@@ -69,9 +69,43 @@ const a11yChecker = () => {
       const heading = getElement('h1');
       const headingLength = heading.length;
       if (headingLength > 1) {
-          console.warn('Should h1 exist in page once usually in warno!')
+          console.warn('Should h1 exist in page once usually in logo!')
       }
   })();
+
+  const checkDocumentOutline = (() => {
+    const allHeadings = [...getElement('h1, h2, h3, h4, h5, h6')];
+    const allHeadingNode= allHeadings.map(ele => ele.nodeName);
+    const uniqueHeadings = allHeadings.filter((item, pos) => allHeadingNode.indexOf(item.nodeName) === pos );
+    const headingsLength = uniqueHeadings.length;
+    
+    if (headingsLength >= 1) {
+      if (uniqueHeadings[0].nodeName !== 'H1') {
+        console.warn('Should heading start with H1:h6')
+      }
+    }
+    if (headingsLength >= 2) {
+      if (uniqueHeadings[1].nodeName !== 'H2') {
+        console.warn('Should using H2 after H1 not any heading else.')
+      }    
+    }
+    if (headingsLength >= 3) { 
+      if (uniqueHeadings[2].nodeName !== 'H3') {
+        console.warn('Should using H3 after H2 not any heading else.')
+      }
+    }
+    if (headingsLength >= 4) {
+      if (uniqueHeadings[3].nodeName !== 'H4') {
+        console.warn('Should using H4 after H3 not any heading else.')
+      }
+    }
+    if (headingsLength >= 5) {
+      if (uniqueHeadings[4].nodeName !== 'H5') {
+        console.warn('Should using H5 after H4 not any heading else.')
+      }
+    }
+  })();
+  
 
   const checkImages = (() => {
       const img = getElement('img');
@@ -419,5 +453,6 @@ code: ${allElements[i].outerHTML}`)
       }
     }
   })();
+
 }
 window.addEventListener('load', a11yChecker);
