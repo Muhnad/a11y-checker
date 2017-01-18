@@ -2,7 +2,7 @@
 
 const a11yChecker = () => {
 
-  const warnMsg = (msg) => { console.warn(msg) };
+  const warnMsg = (msg) => console.warn(msg);
   const getElement = (element) => document.querySelectorAll(element);
   
   const checkDoctype = (() => {
@@ -107,7 +107,6 @@ const a11yChecker = () => {
     }
   })();
   
-
   const checkImages = (() => {
       const img = getElement('img');
       for (let i = 0; i < img.length; i++) {
