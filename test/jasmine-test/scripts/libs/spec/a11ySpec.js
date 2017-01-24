@@ -107,4 +107,10 @@ describe('A11y checker', function () {
     });
   });
 
+  describe('page Ids', function () {
+    it('Id must be unique' , function () {
+      expect(checkDuplicateId()).not.toEqual(1)
+    });
+  });
+
 });
