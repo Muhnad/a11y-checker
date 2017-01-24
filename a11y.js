@@ -452,6 +452,24 @@ code: ${allElements[i].outerHTML}`)
         }
       }
     }
+  })(); 
+
+  const checkDuplicateId = (() => {
+    const allElements = [...getElement('*')];
+    const elementsId = allElements.map(elm => elm.getAttribute('id'));
+    const sortedId = elementsId.sort();
+    const duplicateId = [];
+    for (let i = 0; i < elementsId.length - 1; i++) {
+      if (sortedId[i + 1] === sortedId[i]) {
+        duplicateId.push(sortedId[i]);
+      }
+    }
+    const filterDuplicateId = duplicateId.filter(el => el !== null);
+    const duplicateLength = filterDuplicateId.length;
+    if (duplicateLength >= 1) {
+      warnMsg(`Should ID be unique. 
+duplicate id: ${filterDuplicateId}`);
+    } 
   })();
 
 }
