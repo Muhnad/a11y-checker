@@ -65,20 +65,6 @@ describe('A11y checker', function () {
       expect(checkFooterRole().getAttribute('role')).toBe('contentinfo');
     });
 
-    it('section have role', function () {
-      expect(checkSectionRole()[0].hasAttribute('role')).toBe(true);
-    });
-    it('section role equal region', function () {
-      expect(checkSectionRole()[0].getAttribute('role')).toBe('region');
-    });
-
-    it('article have role', function () {
-      expect(checkArticleRole()[0].hasAttribute('role')).toBe(true);
-    });
-    it('article role equal article', function () {
-      expect(checkArticleRole()[0].getAttribute('role')).toBe('article');
-    });
-
     it('aside have role', function () {
       expect(checkAsideRole()[0].hasAttribute('role')).toBe(true);
     });
@@ -86,11 +72,11 @@ describe('A11y checker', function () {
       expect(checkAsideRole()[0].getAttribute('role')).toBe('complementary');
     });
 
-    it('figure have role', function () {
-      expect(checkFigureRole()[0].hasAttribute('role')).toBe(true);
+    it('svg have role', function () {
+      expect(checkSvgRole()[0].hasAttribute('role')).toBe(true);
     });
-    it('figure role equal group', function () {
-      expect(checkFigureRole()[0].getAttribute('role')).toBe('group');
+    it('svg role equal group', function () {
+      expect(checkSvgRole()[0].getAttribute('role')).toBe('img');
     });
 
     it('form have role', function () {

@@ -245,35 +245,12 @@ code: ${anchor[i].outerHTML}`);
   const checkSectionRole = () => {
       const section = getElement('section');
       for (let i = 0; i < section.length; i++) {
-          if (section[i].hasAttribute('role')) {
-              const sectionRole = section[i].getAttribute('role');
-              if (sectionRole !== 'region') {
-                  warnMsg(`Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
-              }
-          } else {
-              warnMsg(`Should add role=region to section id: ${section[i].id} & class: ${section[i].className}`);
-          }
           if (!section[i].hasAttribute('aria-labelledby')) {
               warnMsg(`Should add aria-labelledby to section id: ${section[i].id} & class: ${section[i].className}`);
           }
       }
       return section;
-  };
-
-  const checkArticleRole = () => {
-      const article = getElement('article');
-      for (let i = 0; i < article.length; i++) {
-          if (article[i].hasAttribute('role')) {
-              const articleRole = article[i].getAttribute('role');
-              if (articleRole !== 'article') {
-                  warnMsg(`Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
-              }
-          } else {
-              warnMsg(`Should add role=article to article id: ${article[i].id} & class: ${article[i].className}`);
-          }
-      }
-      return article;
-  };
+  }
 
   const checkAsideRole = () => {
       const aside = getElement('aside');
@@ -293,23 +270,6 @@ code: ${anchor[i].outerHTML}`);
       return aside;
   };
 
-  const checkFigureRole = () => {
-      const figure = getElement('figure');
-      for (let i = 0; i < figure.length; i++) {
-          if (figure[i].hasAttribute('role')) {
-              const figureRole = figure[i].getAttribute('role');
-              if (figureRole !== 'group') {
-                  warnMsg(`Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
-              }
-          } else {
-              warnMsg(`Should add role=group to figure id: ${figure[i].id} & class: ${figure[i].className}`);
-          }
-          if (!figure[i].hasAttribute('aria-labelledby')) {
-              warnMsg(`Should add aria-labelledby to figure id: ${figure[i].id} & class: ${figure[i].className}`);
-          }
-      }
-      return figure;
-  };
 
   const checkFormRole = () => {
       const form = document.forms;
@@ -331,6 +291,21 @@ code: ${form[i].outerHTML}`);
       }
       return form;
   };
+
+  const checkSvgRole = () => {
+      const svg = getElement('svg');
+      for (let i = 0; i < svg.length; i++) {
+          if (svg[i].hasAttribute('role')) {
+              const svgRole = svg[i].getAttribute('role');
+              if (svgRole !== 'img') {
+                  warnMsg(`Should add role=img to svg id: ${svg[i].id} & class: ${svg[i].className}`);
+              }
+          } else {
+              warnMsg(`Should add role=img to svg id: ${svg[i].id} & class: ${svg[i].className}`);
+          }
+      }
+      return svg;
+  }
 
   const checkLabelRole = () => {
       const label = getElement('label');
