@@ -47,13 +47,11 @@ OR can use CDN link:
         1. Nav label.
     3. Main.
     4. Footer.
-    5. Section.
     6. Aside.
     7. Aside label.
-    8. Figure.
-        1. Figure label.
-9. Form.
-10. Form label.
+    8. Form
+        1. Form label.
+    9. Svg
 10. Label.
     1. For.
     2. For value.
@@ -73,7 +71,6 @@ OR can use CDN link:
     2. Optgroup value.
 15. Tabindex.
     1. Tabindex value.
-16. Click Event.
 
 ## License
 
