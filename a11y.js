@@ -77,31 +77,31 @@ const a11yChecker = () => {
   const checkDocumentOutline = (() => {
     const allHeadings = [...getElement('h1, h2, h3, h4, h5, h6')];
     const allHeadingNode= allHeadings.map(ele => ele.nodeName);
-    const uniqueHeadings = allHeadings.filter((item, pos) => allHeadingNode.indexOf(item.nodeName) === pos );
+    const uniqueHeadings = [...new Set(allHeadingNode)];
     const headingsLength = uniqueHeadings.length;
     
     if (headingsLength >= 1) {
-      if (uniqueHeadings[0].nodeName !== 'H1') {
+      if (uniqueHeadings[0] !== 'H1') {
         warnMsg('Should heading start with H1:h6')
       }
     }
     if (headingsLength >= 2) {
-      if (uniqueHeadings[1].nodeName !== 'H2') {
+      if (uniqueHeadings[1] !== 'H2') {
         warnMsg('Should using H2 after H1 not any heading else.')
       }    
     }
     if (headingsLength >= 3) { 
-      if (uniqueHeadings[2].nodeName !== 'H3') {
+      if (uniqueHeadings[2] !== 'H3') {
         warnMsg('Should using H3 after H2 not any heading else.')
       }
     }
     if (headingsLength >= 4) {
-      if (uniqueHeadings[3].nodeName !== 'H4') {
+      if (uniqueHeadings[3] !== 'H4') {
         warnMsg('Should using H4 after H3 not any heading else.')
       }
     }
     if (headingsLength >= 5) {
-      if (uniqueHeadings[4].nodeName !== 'H5') {
+      if (uniqueHeadings[4] !== 'H5') {
         warnMsg('Should using H5 after H4 not any heading else.')
       }
     }
