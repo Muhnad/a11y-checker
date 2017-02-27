@@ -112,14 +112,27 @@ const a11yChecker = () => {
       for (let i = 0; i < img.length; i++) {
           if (img[i].hasAttribute('src')) {
               const imgSrc = img[i].getAttribute('src');
+              const imgAlt = img[i].getAttribute('alt');            
+            
               if (imgSrc === null || imgSrc === '') {
                   warnMsg(`Should add src=value to the image.
 code: ${img[i].outerHTML}`);
               }
-              if (!img[i].hasAttribute('alt')) {
-                  warnMsg(`Should add alt to the image.
+              if (img[i].hasAttribute('alt')) {
+                const altArrs = ['image', 'picture', 'logo'];
+                const altTxts = altArrs.join(' ');
+                const firstWordInAlt = imgAlt.split(' ')
+                .slice(0,1).join('').toLowerCase();
+                
+                if (altTxts.indexOf(firstWordInAlt) > -1) {
+                  warnMsg(`Should Image alt not start by words like image,picture,logo.
+code: ${img[i].outerHTML}`)
+                }
+              } else {
+                warnMsg(`Should add alt to the image.
 code: ${img[i].outerHTML}`);
-              }                
+              }
+            
          } else {
           warnMsg(`Should add src to the image.
 code: ${img[i].outerHTML}`);
