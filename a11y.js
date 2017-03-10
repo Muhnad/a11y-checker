@@ -108,26 +108,34 @@ const a11yChecker = () => {
   })();
   
   const checkImages = (() => {
-      const img = getElement('img');
+    const img = getElement('img');
       for (let i = 0; i < img.length; i++) {
           if (img[i].hasAttribute('src')) {
               const imgSrc = img[i].getAttribute('src');
               const imgAlt = img[i].getAttribute('alt');            
             
               if (imgSrc === null || imgSrc === '') {
-                  warnMsg(`Should add src=value to the image.
+                warnMsg(`Should add src=value to the image.
 code: ${img[i].outerHTML}`);
               }
+
               if (img[i].hasAttribute('alt')) {
+                const altLength = imgAlt.length;
                 const altArrs = ['image', 'picture', 'logo'];
                 const altTxts = altArrs.join(' ');
                 const firstWordInAlt = imgAlt.split(' ')
                 .slice(0,1).join('').toLowerCase();
                 
+                if (altLength <= 5 && altLength !== 0) {
+                  warnMsg(`Should Image describe well.
+code: ${img[i].outerHTML}`)
+                }
+
                 if (altTxts.indexOf(firstWordInAlt) > -1) {
                   warnMsg(`Should Image alt not start by words like image,picture,logo.
 code: ${img[i].outerHTML}`)
                 }
+
               } else {
                 warnMsg(`Should add alt to the image.
 code: ${img[i].outerHTML}`);

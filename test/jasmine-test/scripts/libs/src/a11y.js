@@ -122,11 +122,16 @@
 code: ${img[i].outerHTML}`);
               }
               if (img[i].hasAttribute('alt')) {
+                const altLength = imgAlt.length;
                 const altArrs = ['image', 'picture', 'logo'];
                 const altTxts = altArrs.join(' ');
                 const firstWordInAlt = imgAlt.split(' ')
                 .slice(0,1).join('').toLowerCase();
-                
+             
+                if (altLength <= 5 && altLength !== 0) {
+                  warnMsg(`Should Image describe well.
+code: ${img[i].outerHTML}`)
+                }                
                 if (altTxts.indexOf(firstWordInAlt) > -1) {
                   warnMsg(`Should Image alt not start by words like image,picture,logo.
 code: ${img[i].outerHTML}`)
