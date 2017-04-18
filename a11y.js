@@ -137,7 +137,7 @@ code: ${img[i].outerHTML}`
             );
           }
 
-          if (altTxts.indexOf(firstWordInAlt) > -1) {
+          if (altTxts.indexOf(firstWordInAlt) > -1 && firstWordInAlt !== '') {
             warnMsg(
               `Should Image alt not start by words like image,picture,logo.
 code: ${img[i].outerHTML}`
