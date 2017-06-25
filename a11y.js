@@ -417,7 +417,7 @@ code: ${input[i].outerHTML}`
       if (input[i].hasAttribute('placeholder')) {
         if (!input[i].hasAttribute('aria-label')) {
           warnMsg(
-            `the placeholder is not guaranteed to be read by assisitive technowarnies, should include aria-label OR label for element.
+            `the placeholder is not guaranteed to be read by assisitive technology, should include aria-label OR label for element.
 code: ${input[i].outerHTML}`
           );
         }
