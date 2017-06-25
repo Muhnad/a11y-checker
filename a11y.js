@@ -49,12 +49,13 @@ const a11yChecker = () => {
   })();
 
   const checkPrintStyle = (() => {
-    const link = getElement('link');
-    for (let i = 0; i < link.length; i++) {
-      const linkStylesheet = link[i].getAttribute('rel');
+    const links = [...getElement('link')];
+
+    links.forEach(link => {
+      const linkStylesheet = link.getAttribute('rel');
       if (linkStylesheet === 'stylesheet') {
-        if (link[i].hasAttribute('media') >= 0) {
-          const linkMedia = link[i].getAttribute('media');
+        if (link.hasAttribute('media') >= 0) {
+          const linkMedia = link.getAttribute('media');
           if (linkMedia !== 'print') {
             warnMsg('Should add print style file to document.');
           }
@@ -62,7 +63,7 @@ const a11yChecker = () => {
           warnMsg('Should add print style file to document.');
         }
       }
-    }
+    });
   })();
 
   const checkHeading = (() => {
@@ -107,20 +108,20 @@ const a11yChecker = () => {
   })();
 
   const checkImages = (() => {
-    const img = getElement('img');
-    for (let i = 0; i < img.length; i++) {
-      if (img[i].hasAttribute('src')) {
-        const imgSrc = img[i].getAttribute('src');
-        const imgAlt = img[i].getAttribute('alt');
+    const imgs = [...getElement('img')];
+    imgs.forEach(img => {
+      if (img.hasAttribute('src')) {
+        const imgSrc = img.getAttribute('src');
+        const imgAlt = img.getAttribute('alt');
 
         if (imgSrc === null || imgSrc === '') {
           warnMsg(
             `Should add src=value to the image.
-code: ${img[i].outerHTML}`
+code: ${img.outerHTML}`
           );
         }
 
-        if (img[i].hasAttribute('alt')) {
+        if (img.hasAttribute('alt')) {
           const altLength = imgAlt.length;
           const altArrs = ['image', 'picture', 'logo'];
           const altTxts = altArrs.join(' ');
@@ -133,34 +134,34 @@ code: ${img[i].outerHTML}`
           if (altLength <= 5 && altLength !== 0) {
             warnMsg(
               `Should Image describe well.
-code: ${img[i].outerHTML}`
+code: ${img.outerHTML}`
             );
           }
 
           if (altTxts.indexOf(firstWordInAlt) > -1 && firstWordInAlt !== '') {
             warnMsg(
               `Should Image alt not start by words like image,picture,logo.
-code: ${img[i].outerHTML}`
+code: ${img.outerHTML}`
             );
           }
         } else {
           warnMsg(
             `Should add alt to the image.
-code: ${img[i].outerHTML}`
+code: ${img.outerHTML}`
           );
         }
       } else {
         warnMsg(
           `Should add src to the image.
-code: ${img[i].outerHTML}`
+code: ${img.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkLinks = (() => {
-    const anchor = getElement('a');
-    const firstAnchor = anchor[0];
+    const anchors = [...getElement('a')];
+    const firstAnchor = anchors[0];
     const listSkipWords = [
       'skip navigation',
       'skip nav',
@@ -179,9 +180,9 @@ code: ${img[i].outerHTML}`
       }
     }
 
-    for (let i = 0; i < anchor.length; i++) {
-      const anchorText = anchor[i].textContent.toLowerCase();
-      const anchorHref = anchor[i].getAttribute('href');
+    anchors.forEach(anchor => {
+      const anchorText = anchor.textContent.toLowerCase();
+      const anchorHref = anchor.getAttribute('href');
       const listCommonWords = [
         'more',
         'click',
@@ -196,43 +197,43 @@ code: ${img[i].outerHTML}`
       if (anchorHref === null || anchorHref === '') {
         warnMsg(
           `Should add href=value to anchor tag.
-code: ${anchor[i].outerHTML}`
+code: ${anchor.outerHTML}`
         );
       }
 
       if (listCommonWords.indexOf(anchorText) >= 0) {
         warnMsg(
           `Should link have a meaningful text to explain where the link goes!
-code: ${anchor[i].outerHTML}`
+code: ${anchor.outerHTML}`
         );
       }
 
-      if (anchor[i].hasAttribute('target')) {
-        const anchorTarget = anchor[i].getAttribute('target');
+      if (anchor.hasAttribute('target')) {
+        const anchorTarget = anchor.getAttribute('target');
         if (anchorTarget === '_blank') {
-          if (!anchor[i].hasAttribute('aria-describedby')) {
+          if (!anchor.hasAttribute('aria-describedby')) {
             warnMsg(
               `Should add alert to recognize this link will open in new tab.
-code: ${anchor[i].outerHTML}`
+code: ${anchor.outerHTML}`
             );
           }
-          if (anchor[i].hasAttribute('rel')) {
-            const anchorRel = anchor[i].getAttribute('rel');
+          if (anchor.hasAttribute('rel')) {
+            const anchorRel = anchor.getAttribute('rel');
             if (anchorRel !== 'noopener') {
               warnMsg(
                 `Should add rel=noopener to 
-code:${anchor[i].outerHTML}`
+code:${anchor.outerHTML}`
               );
             }
           } else {
             warnMsg(
               `Should add rel=noopener to
-code: ${anchor[i].outerHTML}`
+code: ${anchor.outerHTML}`
             );
           }
         }
       }
-    }
+    });
   })();
 
   const checkHeaderRole = (() => {
@@ -250,26 +251,27 @@ code: ${anchor[i].outerHTML}`
   })();
 
   const checkNavRole = (() => {
-    const nav = getElement('nav');
-    for (let i = 0; i < nav.length; i++) {
-      if (nav[i].hasAttribute('role')) {
-        const navRole = nav[i].getAttribute('role');
+    const navs = [...getElement('nav')];
+
+    navs.forEach(nav => {
+      if (nav.hasAttribute('role')) {
+        const navRole = nav.getAttribute('role');
         if (navRole !== 'navigation') {
           warnMsg(
-            ` Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`
+            ` Should add role=navigation to nav id: ${nav.id} & class: ${nav.className}`
           );
         }
       } else {
         warnMsg(
-          ` Should add role=navigation to nav id: ${nav[i].id} & class: ${nav[i].className}`
+          ` Should add role=navigation to nav id: ${nav.id} & class: ${nav.className}`
         );
       }
-      if (!nav[i].hasAttribute('aria-label')) {
+      if (!nav.hasAttribute('aria-label')) {
         warnMsg(
-          `Should add aria-label to nav id: ${nav[i].id} & class: ${nav[i].className}`
+          `Should add aria-label to nav id: ${nav.id} & class: ${nav.className}`
         );
       }
-    }
+    });
   })();
 
   const checkMainRole = (() => {
@@ -301,230 +303,242 @@ code: ${anchor[i].outerHTML}`
   })();
 
   const checkSectionRole = (() => {
-    const section = getElement('section');
-    for (let i = 0; i < section.length; i++) {
-      if (!section[i].hasAttribute('aria-labelledby')) {
+    const sections = [...getElement('section')];
+
+    sections.forEach(section => {
+      if (!section.hasAttribute('aria-labelledby')) {
         warnMsg(
-          `Should add aria-labelledby to section id: ${section[i].id} & class: ${section[i].className}`
+          `Should add aria-labelledby to section id: ${section.id} & class: ${section.className}`
         );
       }
-    }
+    });
   })();
 
   const checkAsideRole = (() => {
-    const aside = getElement('aside');
-    for (let i = 0; i < aside.length; i++) {
-      if (aside[i].hasAttribute('role')) {
-        const asideRole = aside[i].getAttribute('role');
+    const asides = [...getElement('aside')];
+
+    asides.forEach(aside => {
+      if (aside.hasAttribute('role')) {
+        const asideRole = aside.getAttribute('role');
         if (asideRole !== 'complementary') {
           warnMsg(
-            `Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`
+            `Should add role=complementary to aside id: ${aside.id} & class: ${aside.className}`
           );
         }
       } else {
         warnMsg(
-          `Should add role=complementary to aside id: ${aside[i].id} & class: ${aside[i].className}`
+          `Should add role=complementary to aside id: ${aside.id} & class: ${aside.className}`
         );
       }
-      if (!aside[i].hasAttribute('aria-labelledby')) {
+      if (!aside.hasAttribute('aria-labelledby')) {
         warnMsg(
-          `Should add aria-labelledby to aside id: ${aside[i].id} & class: ${aside[i].className}`
+          `Should add aria-labelledby to aside id: ${aside.id} & class: ${aside.className}`
         );
       }
-    }
+    });
   })();
 
   const checkFormRole = (() => {
-    const form = document.forms;
-    for (let i = 0; i < form.length; i++) {
-      if (form[i].hasAttribute('role')) {
-        const formRole = form[i].getAttribute('role');
+    const forms = [...document.forms];
+
+    forms.forEach(form => {
+      if (form.hasAttribute('role')) {
+        const formRole = form.getAttribute('role');
         if (formRole !== 'form' && formRole !== 'search') {
           warnMsg(
             `Should add role=form OR role=search
-code: ${form[i].outerHTML}`
+code: ${form.outerHTML}`
           );
         }
       } else {
         warnMsg(
           `Should add role=form OR role=search
-code: ${form[i].outerHTML}`
+code: ${form.outerHTML}`
         );
       }
-      if (!form[i].hasAttribute('aria-labelledby')) {
+      if (!form.hasAttribute('aria-labelledby')) {
         warnMsg(
           `Should add aria-labelledby to form
-code: ${form[i].outerHTML}`
+code: ${form.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkSvgRole = (() => {
-    const svg = getElement('svg');
-    for (let i = 0; i < svg.length; i++) {
-      if (svg[i].hasAttribute('role')) {
-        const svgRole = svg[i].getAttribute('role');
+    const svgs = [...getElement('svg')];
+
+    svgs.forEach(svg => {
+      if (svg.hasAttribute('role')) {
+        const svgRole = svg.getAttribute('role');
         if (svgRole !== 'img') {
           warnMsg(
-            `Should add role=img to svg id: ${svg[i].id} & class: ${svg[i].className}`
+            `Should add role=img to svg id: ${svg.id} & class: ${svg.className}`
           );
         }
       } else {
         warnMsg(
-          `Should add role=img to svg id: ${svg[i].id} & class: ${svg[i].className}`
+          `Should add role=img to svg id: ${svg.id} & class: ${svg.className}`
         );
       }
-    }
+    });
   })();
 
   const checkLabelRole = (() => {
-    const label = getElement('label');
-    for (let i = 0; i < label.length; i++) {
-      const labelChildLeng = label[i].children.length;
+    const labels = [...getElement('label')];
+
+    labels.forEach(label => {
+      const labelChildLeng = label.children.length;
+
       if (labelChildLeng === 0 || labelChildLeng >= 2) {
-        if (label[i].hasAttribute('for')) {
-          const labelRole = label[i].getAttribute('for');
+        if (label.hasAttribute('for')) {
+          const labelRole = label.getAttribute('for');
           if (labelRole === null || labelRole === '') {
-            warnMsg(`Should add for=value to label: ${label[i].outerHTML}`);
+            warnMsg(`Should add for=value to label: ${label.outerHTML}`);
           }
         } else {
-          warnMsg(`Should add for=value to label: ${label[i].outerHTML}`);
+          warnMsg(`Should add for=value to label: ${label.outerHTML}`);
         }
       }
-    }
+    });
   })();
 
   const checkInputs = (() => {
-    const input = getElement('input');
-    for (let i = 0; i < input.length; i++) {
-      if (input[i].hasAttribute('type')) {
-        const inputTypeVal = input[i].getAttribute('type');
+    const inputs = [...getElement('input')];
+
+    inputs.forEach(input => {
+      if (input.hasAttribute('type')) {
+        const inputTypeVal = input.getAttribute('type');
         if (inputTypeVal === 'submit' || inputTypeVal === 'reset') {
-          if (!input[i].hasAttribute('value')) {
+          if (!input.hasAttribute('value')) {
             warnMsg(
               `Should Add value=value to input
-code: ${input[i].outerHTML}`
+code: ${input.outerHTML}`
             );
           }
         }
       } else {
         warnMsg(
           `Should Add type=value to input
-code: ${input[i].outerHTML}`
+code: ${input.outerHTML}`
         );
       }
-      if (input[i].hasAttribute('placeholder')) {
-        if (!input[i].hasAttribute('aria-label')) {
+      if (input.hasAttribute('placeholder')) {
+        if (!input.hasAttribute('aria-label')) {
           warnMsg(
             `the placeholder is not guaranteed to be read by assisitive technology, should include aria-label OR label for element.
-code: ${input[i].outerHTML}`
+code: ${input.outerHTML}`
           );
         }
       }
-    }
+    });
   })();
 
   const checkIframe = (() => {
-    const iframe = getElement('iframe');
-    for (let i = 0; i < iframe.length; i++) {
-      if (iframe[i].hasAttribute('src')) {
-        const iframeSrc = iframe[i].getAttribute('src');
+    const iframes = [...getElement('iframe')];
+
+    iframes.forEach(iframe => {
+      if (iframe.hasAttribute('src')) {
+        const iframeSrc = iframe.getAttribute('src');
         if (iframeSrc === null || iframeSrc === '') {
           warnMsg(
             `Should add src=value to iframe
-code: ${iframe[i].outerHTML}`
+  code: ${iframe.outerHTML}`
           );
         }
-        if (iframe[i].hasAttribute('title')) {
-          const iframeTitle = iframe[i].getAttribute('title');
+        if (iframe.hasAttribute('title')) {
+          const iframeTitle = iframe.getAttribute('title');
           if (iframeTitle === null || iframeTitle === '') {
             warnMsg(
               `Should add title=value to iframe
-code: ${iframe[i].outerHTML}`
+  code: ${iframe.outerHTML}`
             );
           }
         } else {
           warnMsg(
             `Should add title to iframe
-code: ${iframe[i].outerHTML}`
+  code: ${iframe.outerHTML}`
           );
         }
       } else {
         warnMsg(
           `Should add src to iframe
-code: ${iframe[i].outerHTML}`
+  code: ${iframe.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkButtons = (() => {
-    const btn = getElement('button');
-    for (let i = 0; i < btn.length; i++) {
-      const btnText = btn[i].textContent;
+    const btns = [...getElement('button')];
+
+    btns.forEach(btn => {
+      const btnText = btn.textContent;
       if (btnText === null || btnText === '') {
         warnMsg(
           `Should add text to button
-code: ${btn[i].outerHTML}`
+code: ${btn.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkAbbrTitle = (() => {
-    const abbr = getElement('abbr');
-    for (let i = 0; i < abbr.length; i++) {
-      if (abbr[i].hasAttribute('title')) {
-        const abbrTitle = abbr[i].getAttribute('title');
+    const abbrs = [...getElement('abbr')];
+
+    abbrs.forEach(abbr => {
+      if (abbr.hasAttribute('title')) {
+        const abbrTitle = abbr.getAttribute('title');
         if (abbrTitle === null || abbrTitle === '') {
           warnMsg(
             `Should add title=value to abbr 
-code: ${abbr[i].outerHTML}`
+code: ${abbr.outerHTML}`
           );
         }
       } else {
         warnMsg(
           `Should add title to abbr 
-code: ${abbr[i].outerHTML}`
+code: ${abbr.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkOptgroup = (() => {
-    const optgroup = getElement('optgroup');
-    for (let i = 0; i < optgroup.length; i++) {
-      if (optgroup[i].hasAttribute('label')) {
-        const optLabel = optgroup[i].getAttribute('label');
+    const optgroups = [...getElement('optgroup')];
+
+    optgroups.forEach(optgroup => {
+      if (optgroup.hasAttribute('label')) {
+        const optLabel = optgroup.getAttribute('label');
         if (optLabel === null || optLabel === '') {
           warnMsg(
             `Should add label=value to optgroup
-code: ${optgroup[i].outerHTML}`
+code: ${optgroup.outerHTML}`
           );
         }
       } else {
         warnMsg(
           `Should add label to optgroup
-code: ${optgroup[i].outerHTML}`
+code: ${optgroup.outerHTML}`
         );
       }
-    }
+    });
   })();
 
   const checkTabindexVal = (() => {
-    const allElements = getElement('*');
-    for (let i = 0; i < allElements.length; i++) {
-      if (allElements[i].hasAttribute('tabindex')) {
-        const tabIndexVal = allElements[i].getAttribute('tabindex');
+    const allElements = [...getElement('*')];
+
+    allElements.forEach(allElement => {
+      if (allElement.hasAttribute('tabindex')) {
+        const tabIndexVal = allElement.getAttribute('tabindex');
         if (tabIndexVal >= 1) {
           warnMsg(
             `Avoid using positive integer values for tabindex
-code: ${allElements[i].outerHTML}`
+code: ${allElement.outerHTML}`
           );
         }
       }
-    }
+    });
   })();
 
   const checkDuplicateId = (() => {
