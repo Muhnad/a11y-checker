@@ -23,6 +23,16 @@ OR can use CDN link:
 **Third**, open the console.
 
 
+You can test the website online without download any files just:
+ - Open the console.
+ - Write 
+    ```javascript
+    const script = document.createElement('script');
+    script.src="https://cdn.rawgit.com/Muhnad/a11y-checker/master/a11y.js";
+    document.body.appendChild(script)
+    ```
+- then write `a11yChecker()`
+
 ## A11y check: 
 
 1. Doctype.
