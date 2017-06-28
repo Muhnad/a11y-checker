@@ -373,12 +373,12 @@ code: ${form.outerHTML}`
         const svgRole = svg.getAttribute('role');
         if (svgRole !== 'img') {
           warnMsg(
-            `Should add role=img to svg id: ${svg.id} & class: ${svg.className}`
+            `Should add role=img to svg id: ${svg.id} & class: ${svg.className.baseVal}`
           );
         }
       } else {
         warnMsg(
-          `Should add role=img to svg id: ${svg.id} & class: ${svg.className}`
+          `Should add role=img to svg id: ${svg.id} & class: ${svg.className.baseVal}`
         );
       }
     });
