@@ -1,14 +1,22 @@
 {
   "name": "a11y-checker",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Identifies accessibility issues in your code.",
   "main": "a11y.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "npm-run-all --parallel dev:server lint:watch",
+    "dev:server": "webpack-dev-server --hot --inline",
+    "watch": "webpack -w -d",
+    "build": "webpack -p",
+    "lint": "node_modules/.bin/esw webpack.config.* src --color",
+    "lint:watch": "npm run lint -- --watch"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Muhnad/a11y-checker.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Muhnad/a11y-checker/issues"
   },
   "keywords": [
     "a11y",
@@ -20,8 +28,15 @@
   ],
   "author": "Muhannad Abdelrazek",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/Muhnad/a11y-checker/issues"
-  },
-  "homepage": "https://github.com/Muhnad/a11y-checker#readme"
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-eslint": "^7.2.3",
+    "babel-loader": "^6.4.1",
+    "babel-preset-es2015": "^6.24.1",
+    "eslint": "^3.19.0",
+    "eslint-watch": "^2.1.14",
+    "npm-run-all": "^4.0.2",
+    "webpack": "^2.4.1",
+    "webpack-dev-server": "^2.4.2"
+  }
 }
