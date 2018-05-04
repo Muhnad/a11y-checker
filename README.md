@@ -1,10 +1,35 @@
+# a11y checker
+> Identifies accessibility issues in HTML markup.
 
 
+## Install
+
+```bash
+npm install --save a11y-checker
+```
+
+## Usage
+
+- Import a11yChecker
+```js
+import a11yChecker from 'a11y-checker';
+```
+
+- Call it after page loads:
+```js
+a11yChecker();
+```
+
+## Live Examples
+- [JS Live Example](https://vanilla.codesandbox.io/)
+- [JS Code Example](https://codesandbox.io/s/oozqxkw1lz)
+- [React Live Example](https://9yly237pkr.codesandbox.io/)
+- [React Code Example](https://codesandbox.io/s/9yly237pkr)
 
 ## Contribute
 * clone project
   ```bash
-    git clone git@github.com:Muhnad/a11y-checker.git
+  git clone git@github.com:Muhnad/a11y-checker.git
   ```
 * `cd a11y-checker/`
 * `npm i`
@@ -15,7 +40,6 @@
 - src: for development files.
   - head: for check everything happens inside `<head>`
   - body: for check everything happens inside `<body>`
-- dist: for production usage.
 
 ## Rules
 [Docs](https://github.com/Muhnad/a11y-checker/tree/master/docs)
