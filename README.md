@@ -21,7 +21,7 @@ a11yChecker();
 ```
 
 ## Live Examples
-- [JS Live Example](https://vanilla.codesandbox.io/)
+- [JS Live Example](https://oozqxkw1lz.codesandbox.io/)
 - [JS Code Example](https://codesandbox.io/s/oozqxkw1lz)
 - [React Live Example](https://9yly237pkr.codesandbox.io/)
 - [React Code Example](https://codesandbox.io/s/9yly237pkr)
