@@ -2,7 +2,7 @@
   "name": "a11y-checker",
   "version": "2.0.1",
   "description": "Identifies accessibility issues in your code.",
-  "main": "a11y.js",
+  "main": "./src/a11y.js",
   "scripts": {
     "start": "npm-run-all --parallel dev:server lint:watch",
     "dev:server": "webpack-dev-server --hot --inline",
