@@ -36,7 +36,7 @@ const hasLinksText = () => {
 
 const hasLinksHref = () => {
   const LINKS = [...getElements('a')];
-  const linksWithoutHref = LINKS.filter(link => (isEmpty(getAttribute(link, 'href')) || !hasAttribute(link, 'href')) && !hasAttribute(link, 'role'));
+  const linksWithoutHref = LINKS.filter(link => (!hasAttribute(link, 'href') || isEmpty(getAttribute(link, 'href'))) && !hasAttribute(link, 'role'));
   const hasMissingHref = linksWithoutHref.length > 0;
   const withoutHrefWarning = linksWithoutHref.forEach(link => Warning(`Link Href is missing. Fix: Add href="LINK URL" to ${link.outerHTML}`));
 
