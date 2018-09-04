@@ -1,2 +1,9 @@
+# Directories
 dist
 node_modules
+
+# Files
+package-lock.json
+
+# OSX files
+.DS_Store
