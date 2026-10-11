@@ -18,6 +18,9 @@
       }
     }
   },
+  "bin": {
+    "a11y-checker": "./dist/cli.js"
+  },
   "files": [
     "dist"
   ],
@@ -28,7 +31,9 @@
     "build": "tsup",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude 'test/**/*.integration-test.ts'"
   },
   "repository": {
     "type": "git",
@@ -58,5 +63,10 @@
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.71.1",
     "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "@axe-core/playwright": "^4.13.0",
+    "axe-core": "^4.14.0",
+    "playwright": "^1.64.0"
   }
 }
