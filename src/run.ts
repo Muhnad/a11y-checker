@@ -24,9 +24,15 @@ export interface RunResult {
 
 function format(findings: Finding[]): string {
   if (!findings.length) return 'No accessibility issues found.';
-  const lines = findings.map(
-    (f) =>
-      `[${f.impact}] ${f.ruleId}  ${f.selector ?? `${f.file}:${f.line}`}\n  ${f.message}\n  Fix: ${f.fixHint}\n  ${f.helpUrl}`,
+  const lines = findings.map((f) =>
+    [
+      `[${f.impact}] ${f.ruleId}  ${f.selector ?? `${f.file}:${f.line}`}`,
+      `  ${f.message}`,
+      f.fixHint !== f.message && `  Fix: ${f.fixHint}`,
+      f.helpUrl && `  ${f.helpUrl}`,
+    ]
+      .filter(Boolean)
+      .join('\n'),
   );
   return `${lines.join('\n\n')}\n\n${findings.length} issue(s) found.`;
 }

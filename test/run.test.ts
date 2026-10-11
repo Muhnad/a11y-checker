@@ -48,6 +48,25 @@ describe('run', () => {
     expect(stdout).toContain('https://dequeuniversity.com/rules/axe/4.14/image-alt');
   });
 
+  it('prints file and line for a source finding, without repeating the message as a fix', async () => {
+    const sourceFinding: Finding = {
+      engine: 'source',
+      ruleId: 'jsx-a11y/alt-text',
+      impact: 'serious',
+      wcag: [],
+      message: 'img elements must have an alt prop.',
+      helpUrl: '',
+      fixHint: 'img elements must have an alt prop.',
+      file: 'src/Page.tsx',
+      line: 4,
+    };
+
+    const { stdout } = await run(['src'], scanReturning(sourceFinding));
+
+    expect(stdout).toContain('[serious] jsx-a11y/alt-text  src/Page.tsx:4');
+    expect(stdout).not.toContain('Fix:');
+  });
+
   it('prints the findings as parseable JSON with --json', async () => {
     const found = finding('critical');
 

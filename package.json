@@ -56,17 +56,27 @@
   "author": "Muhannad Abdelrazek",
   "license": "MIT",
   "devDependencies": {
-    "@eslint/js": "^10.0.1",
+    "@eslint/js": "^9.39.5",
     "@types/node": "^26.6.5",
-    "eslint": "^10.12.0",
+    "eslint-plugin-react-native-a11y": "^3.5.1",
     "tsup": "^8.5.1",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.1",
     "vitest": "^5.0.3"
   },
   "dependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@babel/runtime": "^7.29.10",
+    "ast-types-flow": "^0.0.7",
     "axe-core": "^4.14.0",
-    "playwright": "^1.64.0"
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "jsx-ast-utils": "^3.3.5",
+    "playwright": "^1.64.0",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1"
+  },
+  "overrides": {
+    "eslint-plugin-react-native-a11y": {
+      "eslint": "$eslint"
+    }
   }
 }
