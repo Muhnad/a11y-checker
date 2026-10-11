@@ -5,8 +5,10 @@ import type { Finding, Impact } from './types.js';
 
 const IMPACTS: Impact[] = ['minor', 'moderate', 'serious', 'critical'];
 
-export const USAGE = `Usage: a11y-checker <url | html-file | html-string | source-file | directory> [options]
+export const USAGE = `Usage: a11y-checker <target>... [options]
        a11y-checker mcp    Start the MCP server on stdio
+
+Targets: a URL, HTML string, HTML file, source file or directory. Pass several to scan only those.
 
 Options:
   --json               Print findings as JSON
@@ -27,7 +29,7 @@ function format(findings: Finding[]): string {
   if (!findings.length) return 'No accessibility issues found.';
   const lines = findings.map((f) =>
     [
-      `[${f.impact}] ${f.ruleId}  ${f.selector ?? `${f.file}:${f.line}`}`,
+      `[${f.impact}] ${f.ruleId}  ${f.selector ? [f.file, f.selector].filter(Boolean).join(' ') : `${f.file}:${f.line}`}`,
       `  ${f.message}`,
       f.fixHint !== f.message && `  Fix: ${f.fixHint}`,
       f.helpUrl && `  ${f.helpUrl}`,
@@ -41,7 +43,7 @@ function format(findings: Finding[]): string {
 /** The whole CLI, minus process I/O, so it can be tested without spawning. */
 export async function run(
   argv: string[],
-  scanFn: (target: string, opts: ScanOptions) => Promise<Finding[]> = scan,
+  scanFn: (targets: string[], opts: ScanOptions) => Promise<Finding[]> = scan,
 ): Promise<RunResult> {
   try {
     const { values, positionals } = parseArgs({
@@ -58,20 +60,22 @@ export async function run(
 
     if (values.help) return { code: 0, stdout: USAGE, stderr: '' };
 
-    const [target] = positionals;
     const failOn = values['fail-on'] as Impact;
-    if (!target || positionals.length > 1 || !IMPACTS.includes(failOn)) {
+    if (!positionals.length || !IMPACTS.includes(failOn)) {
       return { code: 2, stdout: '', stderr: USAGE };
     }
 
-    const findings = await scanFn(target, {
+    // Warnings go to stderr so `--json` output on stdout stays parseable.
+    const warnings: string[] = [];
+    const findings = await scanFn(positionals, {
       tags: values.tags?.split(',').map((t) => t.trim()),
       waitFor: values['wait-for'],
+      onWarning: (w) => warnings.push(`Warning: ${w}`),
     });
     return {
       code: exceedsThreshold(findings, failOn) ? 1 : 0,
       stdout: values.json ? JSON.stringify(findings, null, 2) : format(findings),
-      stderr: '',
+      stderr: warnings.join('\n'),
     };
   } catch (err) {
     return { code: 2, stdout: '', stderr: err instanceof Error ? err.message : String(err) };

@@ -80,7 +80,35 @@ describe('run', () => {
 
     await run(['https://example.com', '--tags', 'wcag2aa, wcag22aa', '--wait-for', '#app'], scan);
 
-    expect(scan).toHaveBeenCalledWith('https://example.com', { tags: ['wcag2aa', 'wcag22aa'], waitFor: '#app' });
+    expect(scan).toHaveBeenCalledWith(
+      ['https://example.com'],
+      expect.objectContaining({ tags: ['wcag2aa', 'wcag22aa'], waitFor: '#app' }),
+    );
+  });
+
+  it('scans every target given on the command line', async () => {
+    const scan = scanReturning();
+
+    await run(['src/a', 'src/b.tsx'], scan);
+
+    expect(scan).toHaveBeenCalledWith(['src/a', 'src/b.tsx'], expect.any(Object));
+  });
+
+  it('prints the file with the selector for a finding in a local HTML file', async () => {
+    const { stdout } = await run(['page.html'], scanReturning({ ...finding('critical'), file: 'public/page.html' }));
+
+    expect(stdout).toContain('[critical] image-alt  public/page.html img');
+  });
+
+  it('puts scan warnings on stderr and keeps stdout parseable JSON', async () => {
+    const scan = vi.fn().mockImplementation(async (_targets: string[], opts: { onWarning?: (m: string) => void }) => {
+      opts.onWarning?.('Skipped files with no source rules (1 .svelte).');
+      return [];
+    });
+
+    const result = await run(['src', '--json'], scan);
+
+    expect(result).toEqual({ code: 0, stdout: '[]', stderr: 'Warning: Skipped files with no source rules (1 .svelte).' });
   });
 
   it('prints usage and exits 2 without a target', async () => {

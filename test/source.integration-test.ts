@@ -46,7 +46,119 @@ describe('scan (source engine)', () => {
   });
 });
 
+describe('scan (mixed codebase)', () => {
+  it('checks React, Angular (file and inline template) and full HTML pages in one directory', async () => {
+    const findings = await scan(fixture('mixed'));
+
+    const hit = (ruleId: string, file: RegExp) => findings.some((f) => f.ruleId === ruleId && file.test(f.file ?? ''));
+    expect(hit('jsx-a11y/alt-text', /Widget\.tsx$/)).toBe(true);
+    expect(hit('@angular-eslint/template/alt-text', /card\.component\.html$/)).toBe(true);
+    expect(hit('@angular-eslint/template/alt-text', /inline\.component\.ts$/)).toBe(true);
+    expect(hit('image-alt', /page\.html$/)).toBe(true);
+  });
+
+  it('lints a full HTML page only through the browser, not as a template', async () => {
+    const findings = await scan(fixture('mixed'));
+
+    expect(findings.filter((f) => f.file?.endsWith('page.html')).map((f) => f.engine)).toEqual(['web']);
+  });
+
+  it('scans only the files it is given', async () => {
+    const findings = await scan([fixture('mixed/Widget.tsx'), fixture('mixed/page.html')]);
+
+    expect(findings.map((f) => f.file?.split('/').pop()).sort()).toEqual(['Widget.tsx', 'page.html']);
+  });
+});
+
+describe('scan (Vue)', () => {
+  it('reports a Vue single-file component, including one with <script lang="ts">', async () => {
+    const findings = await scan(fixture('vue'));
+
+    expect(findings).toEqual([
+      expect.objectContaining({ ruleId: 'vuejs-accessibility/alt-text', engine: 'source', line: 6 }),
+    ]);
+    expect(findings[0]?.file).toMatch(/vue\/App\.vue$/);
+  });
+});
+
+describe('scan (Astro)', () => {
+  it('reports an Astro page once, through the astro rules only', async () => {
+    const findings = await scan(fixture('astro'));
+
+    expect(findings).toEqual([expect.objectContaining({ ruleId: 'astro/jsx-a11y/alt-text', engine: 'source', line: 7 })]);
+    expect(findings[0]?.file).toMatch(/astro\/Page\.astro$/);
+  });
+});
+
+describe('scan (plain JS and HTML)', () => {
+  it('reports JSX in a .jsx file', async () => {
+    const findings = await scan(fixture('js'));
+
+    expect(findings).toEqual([expect.objectContaining({ ruleId: 'jsx-a11y/alt-text', engine: 'source', line: 2 })]);
+  });
+
+  it('reports a single Angular template file', async () => {
+    const findings = await scan(fixture('mixed/card.component.html'));
+
+    expect(findings).toEqual([expect.objectContaining({ ruleId: '@angular-eslint/template/alt-text', engine: 'source' })]);
+  });
+
+  it('reports a plain HTML page through the browser', async () => {
+    const findings = await scan(fixture('bad.html'));
+
+    expect(findings.map((f) => f.engine)).toContain('web');
+    expect(ruleIds(findings)).toContain('image-alt');
+  });
+});
+
+describe('scan (accessible code in every supported kind)', () => {
+  it('reports nothing and warns about nothing for React, Vue, Astro, Angular and HTML', async () => {
+    const warnings: string[] = [];
+    const findings = await scan(fixture('accessible'), { onWarning: (w) => warnings.push(w) });
+
+    expect(findings).toEqual([]);
+    expect(warnings).toEqual([]);
+  });
+});
+
+describe('scan warnings', () => {
+  const warningsFor = async (path: string) => {
+    const warnings: string[] = [];
+    const findings = await scan(fixture(path), { onWarning: (w) => warnings.push(w) });
+    return { findings, warnings };
+  };
+
+  it('says which files were skipped instead of looking clean', async () => {
+    const { findings, warnings } = await warningsFor('unlinted');
+
+    expect(findings).toEqual([]);
+    expect(warnings).toEqual([expect.stringContaining('1 .svelte')]);
+  });
+
+  it('warns for a single unsupported file and reports no fake finding', async () => {
+    const { findings, warnings } = await warningsFor('unlinted/App.svelte');
+
+    expect(findings).toEqual([]);
+    expect(warnings).toEqual([expect.stringContaining('.svelte')]);
+  });
+
+  it('warns when a directory has nothing to scan', async () => {
+    const { warnings } = await warningsFor('empty');
+
+    expect(warnings).toEqual([expect.stringContaining('No files with source rules')]);
+  });
+
+  it('does not warn when everything was scanned', async () => {
+    expect((await warningsFor('source/clean')).warnings).toEqual([]);
+    expect((await warningsFor('mixed')).warnings).toEqual([]);
+  });
+});
+
 describe('resolveTarget', () => {
+  it('sends an HTML fragment to the source engine', () => {
+    expect(resolveTarget(fixture('mixed/card.component.html'))).toEqual({ source: fixture('mixed/card.component.html') });
+  });
+
   it('sends a directory to the source engine', () => {
     expect(resolveTarget(fixture('source/web'))).toEqual({ source: fixture('source/web') });
   });

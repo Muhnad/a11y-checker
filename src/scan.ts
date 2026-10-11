@@ -1,7 +1,7 @@
-import { existsSync, statSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { scanSource } from './source.js';
+import { FULL_DOCUMENT, htmlDocuments, scanSource } from './source.js';
 import { scanWeb, type WebOptions, type WebTarget } from './web.js';
 import type { Finding } from './types.js';
 
@@ -19,12 +19,26 @@ export function resolveTarget(target: string): Target {
   const path = resolve(t);
   if (existsSync(path)) {
     if (statSync(path).isDirectory()) return { source: path };
-    return HTML_FILE.test(path) ? { url: pathToFileURL(path).href } : { source: path };
+    // An HTML file that is a full page is rendered; a fragment (e.g. an Angular template) is linted.
+    if (HTML_FILE.test(path) && FULL_DOCUMENT.test(readFileSync(path, 'utf8'))) return { url: pathToFileURL(path).href };
+    return { source: path };
   }
   throw new Error(`Unsupported target "${target}": expected a URL, a file or directory path, or an HTML string.`);
 }
 
-export async function scan(target: string, opts: ScanOptions = {}): Promise<Finding[]> {
+async function scanOne(target: string, opts: ScanOptions): Promise<Finding[]> {
   const resolved = resolveTarget(target);
-  return 'source' in resolved ? scanSource(resolved.source) : scanWeb(resolved, opts);
+  if (!('source' in resolved)) return scanWeb(resolved, opts);
+
+  const pages = statSync(resolved.source).isDirectory() ? htmlDocuments(resolved.source) : [];
+  const web = pages.length ? await scanWeb(pages.map((p) => ({ url: pathToFileURL(p).href })), opts) : [];
+  return [...(await scanSource(resolved.source, opts.onWarning)), ...web];
+}
+
+/** Scan one or several targets (URLs, HTML, files, directories); findings are concatenated in target order. */
+export async function scan(target: string | string[], opts: ScanOptions = {}): Promise<Finding[]> {
+  const findings: Finding[] = [];
+  // Sequential on purpose: each web target launches its own browser.
+  for (const t of [target].flat()) findings.push(...(await scanOne(t, opts)));
+  return findings;
 }

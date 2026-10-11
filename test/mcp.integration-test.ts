@@ -17,8 +17,8 @@ describe('MCP server', () => {
 
   const call = async (name: string, args: Record<string, unknown>) => {
     const result = await client.callTool({ name, arguments: args });
-    const [first] = result.content as { text: string }[];
-    return { isError: result.isError, text: first?.text ?? '' };
+    const [first, ...rest] = result.content as { text: string }[];
+    return { isError: result.isError, text: first?.text ?? '', warnings: rest.map((b) => b.text) };
   };
 
   it('lists scan_page and explain_rule', async () => {
@@ -42,6 +42,19 @@ describe('MCP server', () => {
     expect(JSON.parse(text)).toEqual(
       expect.arrayContaining([expect.objectContaining({ engine: 'source', ruleId: 'jsx-a11y/alt-text', line: 4 })]),
     );
+  });
+
+  it('scan_page scans only the listed files', async () => {
+    const { text } = await call('scan_page', { target: [fixture('mixed/Widget.tsx'), fixture('mixed/page.html')] });
+
+    expect(JSON.parse(text).map((f: { file: string }) => f.file.split('/').pop()).sort()).toEqual(['Widget.tsx', 'page.html']);
+  });
+
+  it('scan_page returns a skipped-files warning after the findings instead of a clean result', async () => {
+    const { text, warnings } = await call('scan_page', { target: fixture('unlinted') });
+
+    expect(JSON.parse(text)).toEqual([]);
+    expect(warnings).toEqual([expect.stringContaining('Warning: Skipped files with no source rules')]);
   });
 
   it('scan_page reports an unsupported target as a tool error', async () => {

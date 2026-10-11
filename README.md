@@ -1,10 +1,18 @@
 # a11y-checker
 
-> Accessibility scanner for web pages and React, Next.js and React Native code. Built for CI and for AI agents: structured findings with a fix hint for each.
+> Framework-agnostic accessibility scanner for AI agents and CI. Scan any web app, whatever it is built with, or lint source code directly. Scan a whole project or just the files and directories you name. Findings are structured, each with a fix hint.
 
-- **Web engine**: renders a URL or HTML in Chromium and runs [axe-core](https://github.com/dequelabs/axe-core). Works for any framework (React, Next.js, Vue, Svelte, plain HTML).
-- **Source engine**: lints JS/TS/JSX/TSX with [eslint-plugin-jsx-a11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y) and [eslint-plugin-react-native-a11y](https://github.com/FormidableLabs/eslint-plugin-react-native-a11y). No running app needed; the only option for React Native.
-- **Agent ready**: a CLI with `--json`, an MCP server, and a Claude skill that scans, fixes and rescans.
+- **Web engine (any framework)**: renders a URL, an HTML page or an HTML string in Chromium and runs [axe-core](https://github.com/dequelabs/axe-core). It checks what the browser actually shows, so it works for any stack: React, Next.js, Angular, Vue, Svelte, plain HTML/JS and more.
+- **Source engine (no running app needed)**: lints code directly. Supported today:
+  - React and Next.js (JS/TS/JSX/TSX) with [eslint-plugin-jsx-a11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
+  - React Native with [eslint-plugin-react-native-a11y](https://github.com/FormidableLabs/eslint-plugin-react-native-a11y), the only option for React Native
+  - Vue single-file components (including `<script lang="ts">`) with [eslint-plugin-vuejs-accessibility](https://github.com/vue-a11y/eslint-plugin-vuejs-accessibility)
+  - Astro (`.astro`) with the jsx-a11y rules from [eslint-plugin-astro](https://github.com/ota-meshi/eslint-plugin-astro). Optional: run `npm i -D eslint-plugin-astro` to enable it
+  - Angular templates (`.html` and inline `template:`) with [@angular-eslint](https://github.com/angular-eslint/angular-eslint)
+  - A directory scan also renders any full HTML pages it finds.
+- **Agent ready**: a CLI with `--json`, an MCP server, and a Claude skill that scans, fixes and rescans, limited to the files or directories you name.
+
+For frameworks without a source linter yet (Svelte, template engines such as Handlebars or EJS), scan the running app's URL. A source scan tells you when it skipped files it has no rules for, so a clean result is never silent about what it didn't check.
 
 > Upgrading from v2? v3 is a rewrite. See [Migrating from v2](#migrating-from-v2).
 
@@ -24,10 +32,11 @@ npx a11y-checker https://example.com          # a URL
 npx a11y-checker ./dist/index.html            # an HTML file
 npx a11y-checker src                          # a source directory (React, Next.js, React Native)
 npx a11y-checker src/Button.tsx               # a single source file
+npx a11y-checker src/cart src/Header.tsx      # only these directories and files
 npx a11y-checker '<img src="a.png">'          # an HTML string
 ```
 
-The target decides the engine: URLs, HTML files and HTML strings use `web`; any other file or directory uses `source`.
+Pass several targets to scan only those. The target decides the engine: URLs, full HTML pages and HTML strings use `web`; other files and directories use `source`. A directory scan covers every kind it finds: JS/TS/JSX/TSX, Angular templates (`.html` fragments and inline `template:` strings) and full HTML pages (rendered and checked with axe).
 
 | Option | Description |
 | --- | --- |
@@ -36,7 +45,7 @@ The target decides the engine: URLs, HTML files and HTML strings use `web`; any 
 | `--tags <list>` | Comma-separated axe tags, e.g. `wcag2aa,wcag22aa` (web only) |
 | `--wait-for <css>` | Wait for this selector before scanning (web only) |
 
-Exit codes: `0` ok, `1` findings at or above the threshold, `2` usage or runtime error.
+Exit codes: `0` ok, `1` findings at or above the threshold, `2` usage or runtime error. Notes about skipped files go to stderr as `Warning: ...`, so `--json` output stays parseable.
 
 Each finding looks like this:
 
@@ -62,6 +71,11 @@ Source findings have `file` and `line` instead of `selector` and `html`.
 | --- | --- | --- |
 | React, Vue, Svelte, any web app | URL of the running app | Checks the rendered page, including contrast |
 | Next.js | `src` or `app` directory, and each route's URL | Source scan is static; the URL scan catches what only exists at runtime, such as `next/image` alt text |
+| Angular | the source directory, and the running app's URL | Source scan lints `.html` templates and inline `template:` strings |
+| Plain HTML | the file or directory | Pages are rendered and checked with axe |
+| Vue | the source directory, and the running app's URL | Source scan lints `.vue` files |
+| Astro | the source directory, and the running site's URL | Source scan lints `.astro` files once `eslint-plugin-astro` is installed (see below); without it they are skipped with a warning |
+| Svelte, DOM built in plain JS | URL of the running app | No static source rules yet; a source scan warns that it skipped these files |
 | React Native | the source directory | Static only. There is no runtime scan of a device or simulator yet |
 
 For multi-page apps, scan each route's URL.
@@ -79,7 +93,7 @@ For multi-page apps, scan each route's URL.
 ```js
 import { scan, exceedsThreshold } from 'a11y-checker';
 
-const findings = await scan('https://example.com', { tags: ['wcag2aa'] });
+const findings = await scan('https://example.com', { tags: ['wcag2aa'], onWarning: console.warn }); // or scan(['src/a', 'src/b.tsx'])
 if (exceedsThreshold(findings, 'serious')) process.exit(1);
 ```
 
@@ -93,13 +107,16 @@ claude mcp add a11y-checker -- npx -y a11y-checker mcp
 
 For other clients, use the command `npx -y a11y-checker mcp` in their MCP config.
 
-**Skill.** [`skills/a11y-fix/SKILL.md`](skills/a11y-fix/SKILL.md) teaches an agent to scan, fix, rescan and report what needs a human. Copy the `a11y-fix` folder to `~/.claude/skills/` (or `.claude/skills/` in a project). The repo is also a Claude Code plugin (`.claude-plugin/plugin.json`).
+**Skill.** [`skills/a11y-fix/SKILL.md`](skills/a11y-fix/SKILL.md) teaches an agent to scan, fix, rescan and report what needs a human. It works on the files, directories or URLs you name ("check `src/components`"), not the whole codebase unless you ask. Copy the `a11y-fix` folder to `~/.claude/skills/` (or `.claude/skills/` in a project). The repo is also a Claude Code plugin (`.claude-plugin/plugin.json`).
 
 ## Limits
 
 - Automated checks find only part of the problems. Do a keyboard and screen reader pass too.
 - Source findings carry no WCAG tags and are all reported as `serious`, because the ESLint rules don't provide them.
 - The source engine doesn't check Next.js `<Image>` alt text. The web engine does.
+- Angular templates are linted with `@angular-eslint`'s accessibility rules. They can't see content that only exists at runtime; scan the running app too.
+- Source scanning skips file types it has no rules for (for example `.svelte`, `.hbs`, `.ejs`) and says so with a warning. The warning comes through the CLI's stderr, as an extra block after the findings in the MCP result, and through `onWarning` in `scan()`.
+- `eslint-plugin-astro` is an optional peer dependency, not installed by default: the releases that work with ESLint 9 depend on a package (`braces`) with an unpatched advisory, and we don't want it in every install. Install it only if you scan Astro code.
 - Rules are axe-core's and the two ESLint plugins'; see [axe rules](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
 
 ## Migrating from v2

@@ -1,6 +1,6 @@
 ---
 name: a11y-fix
-description: Find and fix accessibility problems in a web page or a React, Next.js or React Native codebase. Use when asked to audit, check or fix accessibility (a11y, WCAG, axe, screen reader, alt text, labels, contrast).
+description: Find and fix accessibility problems in a web page or codebase (React, Next.js, React Native, Angular, plain HTML/JS), or in just the files or directories the user names. Use when asked to audit, check or fix accessibility (a11y, WCAG, axe, screen reader, alt text, labels, contrast).
 ---
 
 # a11y-fix
@@ -9,7 +9,9 @@ Scan, fix, rescan, report. Uses the `a11y-checker` MCP tools (`scan_page`, `expl
 
 ## 1. Pick the target
 
-- **Source code** (React, Next.js, React Native): scan the directory or file. Findings carry `file` and `line`. Works without a running app and is the only option for React Native.
+**Scope first.** Scan only what the user named: a file, several files, a directory or a URL. Pass them all in one call (`target` can be a list; the CLI takes several arguments). If they named nothing, ask which files or directories; scan the whole project only when they ask for the whole codebase. Only edit files inside that scope, and report (do not fix) findings that point outside it.
+
+- **Source code**: scan the directory or file. A directory scan covers JS/TS/JSX/TSX (React, Next.js, React Native), Vue (`.vue`), Astro (`.astro`, needs `eslint-plugin-astro` installed in the project), Angular templates (`.html` fragments and inline `template:` strings in `*.component.ts`), and full HTML pages (rendered and checked with axe). Svelte, template engines and DOM code built in plain JS (`document.createElement`) are not linted statically; scan the running page's URL instead. Findings carry `file` and `line`. Works without a running app and is the only option for React Native.
 - **Running app or page**: scan the URL (start the dev server first if needed). Findings carry a CSS `selector` and `html`. Use this too for Next.js, because it checks the rendered result (e.g. `next/image` alt, page title, contrast), which source scanning cannot.
 - Do both for a web app when you can: source first, then the URL.
 
@@ -19,7 +21,7 @@ Next.js and multi-page apps have many routes. Scan each important route's URL.
 
 ## 2. Scan
 
-Call `scan_page` with the target. Add `tags: ["wcag2aa", "wcag22aa"]` for a specific WCAG level. For client-rendered pages, pass `waitFor` with a selector that appears once the app has rendered.
+Call `scan_page` with the target. If the result (or the CLI's stderr) carries a `Warning:` about skipped files or nothing to scan, those files were **not checked**. Never report a clean result for them: say so, and scan the running app's URL instead (or ask for it). Add `tags: ["wcag2aa", "wcag22aa"]` for a specific WCAG level. For client-rendered pages, pass `waitFor` with a selector that appears once the app has rendered.
 
 ## 3. Fix
 
@@ -50,3 +52,4 @@ Give: what was fixed (rule, file), what remains, and why. Always call out these 
 
 - Source scanning does not check Next.js `<Image>` alt text. The URL scan does.
 - Source findings have no WCAG tags and are all reported as `serious`.
+- Source scanning does not cover Svelte, template engines or markup built by plain JS; use the URL scan for those.

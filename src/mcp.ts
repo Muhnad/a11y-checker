@@ -4,8 +4,12 @@ import { z } from 'zod';
 import { FIX_HINTS } from './normalize.js';
 import { scan } from './scan.js';
 
-const text = (value: unknown, isError = false) => ({
-  content: [{ type: 'text' as const, text: typeof value === 'string' ? value : JSON.stringify(value, null, 2) }],
+const block = (value: unknown) => ({
+  type: 'text' as const,
+  text: typeof value === 'string' ? value : JSON.stringify(value, null, 2),
+});
+const text = (value: unknown, isError = false, warnings: string[] = []) => ({
+  content: [block(value), ...warnings.map((w) => block(`Warning: ${w}`))],
   isError,
 });
 
@@ -16,16 +20,20 @@ export function createServer(): McpServer {
     'scan_page',
     {
       description:
-        'Scan for accessibility problems and return structured findings. target is a URL, an HTML file or string (rendered in Chromium with axe-core), or a source file/directory (React, Next.js, React Native; linted). Each finding has ruleId, impact, fixHint and a selector (web) or file and line (source).',
+        'Scan for accessibility problems and return structured findings. target is a URL, an HTML file or string (rendered in Chromium with axe-core), or a source file/directory (React, Next.js, React Native, Angular templates, HTML; linted). Pass only the files or directories the user asked about. Each finding has ruleId, impact, fixHint and a selector (web) or file and line (source).',
       inputSchema: {
-        target: z.string().describe('URL, file or directory path, or an HTML string'),
+        target: z
+          .union([z.string(), z.array(z.string()).min(1)])
+          .describe('URL, file or directory path, or an HTML string; or a list of them to scan only those'),
         tags: z.array(z.string()).optional().describe('axe tags, e.g. ["wcag2aa","wcag22aa"]; web targets only'),
         waitFor: z.string().optional().describe('CSS selector to wait for before scanning; web targets only'),
       },
     },
     async ({ target, tags, waitFor }) => {
+      const warnings: string[] = [];
       try {
-        return text(await scan(target, { tags, waitFor }));
+        // The findings are always the first content block; warnings follow as plain text.
+        return text(await scan(target, { tags, waitFor, onWarning: (w) => warnings.push(w) }), false, warnings);
       } catch (e) {
         return text(e instanceof Error ? e.message : String(e), true);
       }
