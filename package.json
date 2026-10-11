@@ -65,6 +65,7 @@
   "dependencies": {
     "@axe-core/playwright": "^4.13.0",
     "@babel/runtime": "^7.29.10",
+    "@modelcontextprotocol/sdk": "^1.32.1",
     "ast-types-flow": "^0.0.7",
     "axe-core": "^4.14.0",
     "eslint": "^9.39.5",
@@ -72,7 +73,8 @@
     "jsx-ast-utils": "^3.3.5",
     "playwright": "^1.64.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.1"
+    "typescript-eslint": "^8.71.1",
+    "zod": "^4.6.6"
   },
   "overrides": {
     "eslint-plugin-react-native-a11y": {

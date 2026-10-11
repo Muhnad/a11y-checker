@@ -1,0 +1,5 @@
+{
+  "mcpServers": {
+    "a11y-checker": { "command": "npx", "args": ["-y", "a11y-checker", "mcp"] }
+  }
+}

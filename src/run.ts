@@ -5,7 +5,8 @@ import type { Finding, Impact } from './types.js';
 
 const IMPACTS: Impact[] = ['minor', 'moderate', 'serious', 'critical'];
 
-export const USAGE = `Usage: a11y-checker <url | html-file | html-string> [options]
+export const USAGE = `Usage: a11y-checker <url | html-file | html-string | source-file | directory> [options]
+       a11y-checker mcp    Start the MCP server on stdio
 
 Options:
   --json               Print findings as JSON

@@ -2,7 +2,7 @@ import type { Result } from 'axe-core';
 import type { Finding, Impact } from './types.js';
 
 // Seeded from the v2 `Fix:` messages; unknown rules fall back to axe's own help text.
-const FIX_HINTS: Record<string, string> = {
+export const FIX_HINTS: Record<string, string> = {
   'document-title': 'Add a descriptive <title> inside <head>.',
   'html-has-lang': 'Add lang="<language code>" to <html>.',
   'html-lang-valid': 'Use a valid language code in the lang attribute of <html>.',

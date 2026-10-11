@@ -1,0 +1,8 @@
+{
+  "name": "a11y-checker",
+  "version": "3.0.0-alpha.0",
+  "description": "Scan web pages and React, Next.js and React Native code for accessibility problems, then fix them with an agent.",
+  "author": { "name": "Muhannad Abdelrazek" },
+  "repository": "https://github.com/Muhnad/a11y-checker",
+  "license": "MIT"
+}
