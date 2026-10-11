@@ -1,5 +1,5 @@
 ---
-name: " \U0001F31F Feature request"
+name: "\U0001F31F Feature request"
 about: Request a new feature to be added
 title: ''
 labels: ''
@@ -8,7 +8,7 @@ assignees: ''
 ---
 
 **Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I cannot be able to check....
+A clear and concise description of what the problem is. Ex. I cannot check ...
 
 **Describe the solution you'd like**
 A clear and concise description of what you want to happen.

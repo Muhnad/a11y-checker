@@ -63,6 +63,8 @@
     "vitest": "^5.0.3"
   },
   "dependencies": {
+    "@angular-eslint/eslint-plugin-template": "^22.6.0",
+    "@angular-eslint/template-parser": "^22.6.0",
     "@axe-core/playwright": "^4.13.0",
     "@babel/runtime": "^7.29.10",
     "@modelcontextprotocol/sdk": "^1.32.1",
