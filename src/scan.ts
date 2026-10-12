@@ -1,8 +1,8 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import { FULL_DOCUMENT, htmlDocuments, scanSource } from './source.js';
-import { scanWeb, type WebOptions, type WebTarget } from './web.js';
+import { FULL_DOCUMENT, htmlDocuments } from './files.js';
+import type { WebOptions, WebTarget } from './web.js';
 import type { Finding } from './types.js';
 
 export type ScanOptions = WebOptions;
@@ -26,12 +26,16 @@ export function resolveTarget(target: string): Target {
   throw new Error(`Unsupported target "${target}": expected a URL, a file or directory path, or an HTML string.`);
 }
 
+// The engines are imported on demand: a source scan never loads Playwright, a web scan never loads ESLint.
+const webEngine = () => import('./web.js');
+
 async function scanOne(target: string, opts: ScanOptions): Promise<Finding[]> {
   const resolved = resolveTarget(target);
-  if (!('source' in resolved)) return scanWeb(resolved, opts);
+  if (!('source' in resolved)) return (await webEngine()).scanWeb(resolved, opts);
 
+  const { scanSource } = await import('./source.js');
   const pages = statSync(resolved.source).isDirectory() ? htmlDocuments(resolved.source) : [];
-  const web = pages.length ? await scanWeb(pages.map((p) => ({ url: pathToFileURL(p).href })), opts) : [];
+  const web = pages.length ? await (await webEngine()).scanWeb(pages.map((p) => ({ url: pathToFileURL(p).href })), opts) : [];
   return [...(await scanSource(resolved.source, opts.onWarning)), ...web];
 }
 

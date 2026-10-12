@@ -3,6 +3,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
 import { FIX_HINTS } from './normalize.js';
 import { scan } from './scan.js';
+import { skillWorkflow } from './skill.js';
 
 const block = (value: unknown) => ({
   type: 'text' as const,
@@ -58,6 +59,20 @@ export function createServer(): McpServer {
         helpUrl: rule.helpUrl,
       });
     },
+  );
+
+  // The skill's workflow, for MCP clients that have no skill support.
+  server.registerPrompt(
+    'a11y-fix',
+    {
+      description: 'Find and fix accessibility problems in the files, directories or URL you name: scan, fix, rescan, report.',
+      argsSchema: { target: z.string().optional().describe('File, directory or URL to check') },
+    },
+    ({ target }) => ({
+      messages: [
+        { role: 'user', content: { type: 'text', text: `${target ? `Target: ${target}\n\n` : ''}${skillWorkflow()}` } },
+      ],
+    }),
   );
 
   return server;

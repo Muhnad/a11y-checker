@@ -1,3 +1,6 @@
+import { mkdtempSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { scan } from '../src/index.js';
 import { resolveTarget } from '../src/scan.js';
@@ -118,6 +121,19 @@ describe('scan (accessible code in every supported kind)', () => {
 
     expect(findings).toEqual([]);
     expect(warnings).toEqual([]);
+  });
+});
+
+describe('scan (repeat scans)', () => {
+  it('reports an edited file afresh instead of replaying a cached result', async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'a11y-cache-'));
+    const file = join(dir, 'Page.jsx');
+    writeFileSync(file, 'export const P = () => <img src="a.png" />;\n');
+    expect(ruleIds(await scan(dir))).toEqual(['jsx-a11y/alt-text']);
+
+    writeFileSync(file, 'export const P = () => <img src="a.png" alt="A lake" />;\n');
+
+    expect(await scan(dir)).toEqual([]);
   });
 });
 

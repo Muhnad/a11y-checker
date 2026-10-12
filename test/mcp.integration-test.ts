@@ -27,6 +27,21 @@ describe('MCP server', () => {
     expect(tools.map((t) => t.name).sort()).toEqual(['explain_rule', 'scan_page']);
   });
 
+  it('lists the a11y-fix prompt with an optional target', async () => {
+    const { prompts } = await client.listPrompts();
+
+    expect(prompts).toEqual([expect.objectContaining({ name: 'a11y-fix', arguments: [expect.objectContaining({ name: 'target', required: false })] })]);
+  });
+
+  it('a11y-fix prompt returns the skill workflow, led by the target when given', async () => {
+    const { messages } = await client.getPrompt({ name: 'a11y-fix', arguments: { target: 'src/cart' } });
+    const text = (messages[0]?.content as { text: string }).text;
+
+    expect(text.startsWith('Target: src/cart\n\n# a11y-fix')).toBe(true);
+    expect(text).toContain('Rescan');
+    expect(text).not.toContain('name: a11y-fix');
+  });
+
   it('scan_page returns structured findings for a bad page', async () => {
     const { isError, text } = await call('scan_page', { target: fixture('bad.html') });
 

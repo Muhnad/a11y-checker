@@ -1,49 +1,13 @@
-import { readdirSync, readFileSync, statSync } from 'node:fs';
+import { statSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import { basename, dirname, extname, join, relative, sep } from 'node:path';
-import angularTemplate from '@angular-eslint/eslint-plugin-template';
-import angularParser from '@angular-eslint/template-parser';
-import { ESLint, type Linter } from 'eslint';
-import jsxA11y from 'eslint-plugin-jsx-a11y';
-import rnA11y from 'eslint-plugin-react-native-a11y';
-import tseslint from 'typescript-eslint';
-import vueA11y from 'eslint-plugin-vuejs-accessibility';
+import { pathToFileURL } from 'node:url';
+import type { ESLint, Linter } from 'eslint';
+import { listFiles, htmlDocuments, SKIP_DIRS } from './files.js';
 import type { Finding } from './types.js';
 
 const RN_DOCS = 'https://github.com/FormidableLabs/eslint-plugin-react-native-a11y';
-
-const rnRules = Object.fromEntries(Object.keys(rnA11y.configs.all.rules).map((id) => [id, 'error'])) as Linter.RulesRecord;
-
-const ngRules = Object.fromEntries(
-  [
-    'alt-text',
-    'click-events-have-key-events',
-    'elements-content',
-    'interactive-supports-focus',
-    'label-has-associated-control',
-    'mouse-events-have-key-events',
-    'no-autofocus',
-    'no-distracting-elements',
-    'no-positive-tabindex',
-    'role-has-required-aria',
-    'table-scope',
-    'valid-aria',
-  ].map((id) => [`@angular-eslint/template/${id}`, 'error']),
-) as Linter.RulesRecord;
-
-const SKIP_DIRS = ['node_modules', 'dist', 'build', '.next', 'coverage', '.git'];
-export const FULL_DOCUMENT = /<html[\s>]|<!doctype/i;
-
-/** Every file under a directory, skipping dependency and build folders. Paths are absolute. */
-function listFiles(dir: string): string[] {
-  return readdirSync(dir, { recursive: true, encoding: 'utf8' })
-    .filter((f) => !f.split(sep).some((part) => SKIP_DIRS.includes(part)))
-    .map((f) => join(dir, f));
-}
-
-/** Full HTML pages under a directory. They are rendered and checked with axe, not linted as template fragments. */
-export function htmlDocuments(dir: string): string[] {
-  return listFiles(dir).filter((f) => /\.html?$/i.test(f) && FULL_DOCUMENT.test(readFileSync(f, 'utf8')));
-}
 
 // Template formats we have no source rules for. A scan must say so instead of reporting a clean result.
 const UNSUPPORTED = /^\.(svelte|hbs|handlebars|ejs|pug|njk|liquid|twig|erb|mdx|marko)$/i;
@@ -65,63 +29,118 @@ function warnSkipped(files: string[], onWarning: OnWarning): boolean {
 /**
  * eslint-plugin-astro is an optional peer, loaded only when there are .astro files: the releases that work
  * with ESLint 9 depend on fast-glob, whose `braces` dependency has an unpatched advisory, and we do not want
- * every install to carry it. Its config re-registers jsx-a11y (already registered here, which ESLint rejects)
- * and applies its `astro/jsx-a11y/*` rules to every file; those are kept to .astro files so JSX files are not
- * reported twice.
+ * every install to carry it. It is looked up from the scanned directory too, so `npx a11y-checker` finds the
+ * copy installed in the project. Its config re-registers jsx-a11y (already registered here, which ESLint
+ * rejects) and applies its `astro/jsx-a11y/*` rules to every file; those are kept to .astro files so JSX files
+ * are not reported twice.
  */
-async function loadAstro(): Promise<Linter.Config[] | undefined> {
+async function loadAstro(from: string): Promise<Linter.Config[] | undefined> {
+  let plugin: { default: { configs: { 'flat/jsx-a11y-recommended': Linter.Config[] } } };
   try {
-    const { default: astro } = await import('eslint-plugin-astro');
-    return astro.configs['flat/jsx-a11y-recommended'].map(({ plugins, ...rest }): Linter.Config => {
-      const own = Object.fromEntries(Object.entries(plugins ?? {}).filter(([name]) => name !== 'jsx-a11y'));
-      return {
-        ...rest,
-        ...(Object.keys(own).length && { plugins: own }),
-        ...(rest.rules && !rest.files && { files: ['**/*.astro'] }),
-      };
-    });
+    plugin = await import('eslint-plugin-astro');
   } catch {
-    // ponytail: any load failure is treated as "not installed"; the caller warns that .astro files were skipped.
-    return undefined;
+    try {
+      plugin = await import(pathToFileURL(createRequire(join(from, 'noop.js')).resolve('eslint-plugin-astro')).href);
+    } catch {
+      // ponytail: any load failure is treated as "not installed"; the caller warns that .astro files were skipped.
+      return undefined;
+    }
   }
+  return plugin.default.configs['flat/jsx-a11y-recommended'].map(({ plugins, ...rest }): Linter.Config => {
+    const own = Object.fromEntries(Object.entries(plugins ?? {}).filter(([name]) => name !== 'jsx-a11y'));
+    return {
+      ...rest,
+      ...(Object.keys(own).length && { plugins: own }),
+      ...(rest.rules && !rest.files && { files: ['**/*.astro'] }),
+    };
+  });
 }
 
-// Both plugins key on element names (`img`/`button` vs Touchable*/Image from react-native),
-// so running both on every file does not cross-fire.
-const makeConfig = (astroConfigs: Linter.Config[]): Linter.Config[] => [
-  { ignores: SKIP_DIRS.map((d) => `**/${d}/**`) },
-  {
-    files: ['**/*.{js,jsx,ts,tsx}'],
-    languageOptions: { parser: tseslint.parser as Linter.Parser, parserOptions: { ecmaFeatures: { jsx: true } } },
-  },
-  // Astro files get the wrapped astro/jsx-a11y rules below instead.
-  { ...jsxA11y.flatConfigs.recommended, ignores: ['**/*.astro'] },
-  { files: ['**/*.{js,jsx,ts,tsx}'], plugins: { 'react-native-a11y': rnA11y }, rules: rnRules },
-  ...astroConfigs,
-  ...vueA11y.configs['flat/recommended'],
-  // Let `<script lang="ts">` in Vue files parse as TypeScript.
-  { files: ['**/*.vue'], languageOptions: { parserOptions: { parser: tseslint.parser, ecmaFeatures: { jsx: false } } } },
-  // Angular templates, and HTML fragments in general; the processor also lints inline `template:` strings.
-  { files: ['**/*.component.ts'], processor: angularTemplate.processors!['extract-inline-html'] as Linter.Processor },
-  {
-    files: ['**/*.html'],
-    languageOptions: { parser: angularParser as Linter.Parser },
-    plugins: { '@angular-eslint/template': angularTemplate as ESLint.Plugin },
-    rules: ngRules,
-  },
+const NG_RULES = [
+  'alt-text',
+  'click-events-have-key-events',
+  'elements-content',
+  'interactive-supports-focus',
+  'label-has-associated-control',
+  'mouse-events-have-key-events',
+  'no-autofocus',
+  'no-distracting-elements',
+  'no-positive-tabindex',
+  'role-has-required-aria',
+  'table-scope',
+  'valid-aria',
 ];
+
+/**
+ * The ESLint config for the kinds of file about to be linted. Each plugin is imported only when a matching file
+ * exists, which is most of a scan's start-up time. Both JSX plugins key on element names (`img`/`button` vs
+ * the react-native components), so running both on every file does not cross-fire.
+ */
+async function makeConfig(files: string[], astroConfigs: Linter.Config[]): Promise<Linter.Config[]> {
+  const has = (re: RegExp) => files.some((f) => re.test(f));
+  const config: Linter.Config[] = [{ ignores: SKIP_DIRS.map((d) => `**/${d}/**`) }];
+  // Angular inline templates live in .component.ts files, which are also TypeScript.
+  const needsParser = has(/\.(jsx?|tsx?|vue)$/i);
+  const tsParser = needsParser ? ((await import('@typescript-eslint/parser')) as { default: Linter.Parser }).default : undefined;
+
+  if (has(/\.(jsx?|tsx?)$/i)) {
+    const [{ default: jsxA11y }, { default: rnA11y }] = await Promise.all([
+      import('eslint-plugin-jsx-a11y'),
+      import('eslint-plugin-react-native-a11y'),
+    ]);
+    const rnRules = Object.fromEntries(Object.keys(rnA11y.configs.all.rules).map((id) => [id, 'error'])) as Linter.RulesRecord;
+    config.push(
+      { files: ['**/*.{js,jsx,ts,tsx}'], languageOptions: { parser: tsParser, parserOptions: { ecmaFeatures: { jsx: true } } } },
+      // Astro files get the wrapped astro/jsx-a11y rules below instead.
+      { ...jsxA11y.flatConfigs.recommended, ignores: ['**/*.astro'] },
+      { files: ['**/*.{js,jsx,ts,tsx}'], plugins: { 'react-native-a11y': rnA11y }, rules: rnRules },
+    );
+  }
+  config.push(...astroConfigs);
+  if (has(/\.vue$/i)) {
+    const { default: vueA11y } = await import('eslint-plugin-vuejs-accessibility');
+    config.push(
+      ...vueA11y.configs['flat/recommended'],
+      // Let `<script lang="ts">` in Vue files parse as TypeScript.
+      { files: ['**/*.vue'], languageOptions: { parserOptions: { parser: tsParser, ecmaFeatures: { jsx: false } } } },
+    );
+  }
+  // Angular templates, and HTML fragments in general; the processor also lints inline `template:` strings.
+  if (has(/\.(html?|component\.ts)$/i)) {
+    const [{ default: angularTemplate }, { default: angularParser }] = await Promise.all([
+      import('@angular-eslint/eslint-plugin-template'),
+      import('@angular-eslint/template-parser'),
+    ]);
+    config.push(
+      { files: ['**/*.component.ts'], processor: angularTemplate.processors!['extract-inline-html'] as Linter.Processor },
+      {
+        files: ['**/*.html'],
+        languageOptions: { parser: angularParser },
+        plugins: { '@angular-eslint/template': angularTemplate },
+        rules: Object.fromEntries(NG_RULES.map((id) => [`@angular-eslint/template/${id}`, 'error'])) as Linter.RulesRecord,
+      },
+    );
+  }
+  return config;
+}
 
 /** Lint a source file or directory (JS/JSX/TS/TSX, Vue, Astro, Angular templates, HTML fragments) with the a11y rules. */
 export async function scanSource(path: string, onWarning: OnWarning = () => {}): Promise<Finding[]> {
   const isDir = statSync(path).isDirectory();
   const files = isDir ? listFiles(path) : [path];
   const astroFiles = files.filter((f) => extname(f).toLowerCase() === '.astro');
-  const astroConfigs = astroFiles.length ? await loadAstro() : undefined;
+  const cwd = isDir ? path : dirname(path);
+  const astroConfigs = astroFiles.length ? await loadAstro(cwd) : undefined;
+  const { ESLint } = await import('eslint');
   const eslint = new ESLint({
-    cwd: isDir ? path : dirname(path),
+    cwd,
     overrideConfigFile: true,
-    overrideConfig: makeConfig(astroConfigs ?? []),
+    overrideConfig: await makeConfig(files, astroConfigs ?? []),
     errorOnUnmatchedPattern: false,
+    // Outside the project so no .eslintcache lands in the user's repo; the trailing separator makes ESLint
+    // keep one cache file per working directory.
+    cache: true,
+    cacheLocation: join(tmpdir(), 'a11y-checker-cache') + sep,
   });
   const pages = new Set(isDir ? htmlDocuments(path) : []);
   // For a file with no matching config ESLint returns only a "File ignored" warning; that is not a finding.
@@ -131,7 +150,7 @@ export async function scanSource(path: string, onWarning: OnWarning = () => {}):
   let skipped = warnSkipped(files, onWarning);
   if (astroFiles.length && !astroConfigs) {
     onWarning(
-      `Skipped ${astroFiles.length} .astro file(s): install eslint-plugin-astro (npm i -D eslint-plugin-astro) to lint them, or scan the running site's URL.`,
+      `Skipped ${astroFiles.length} .astro file(s): run npx a11y-checker init to install eslint-plugin-astro (or npm i -D a11y-checker eslint-plugin-astro), or scan the running site's URL.`,
     );
     skipped = true;
   }

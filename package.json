@@ -22,7 +22,8 @@
     "a11y-checker": "./dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "skills"
   ],
   "engines": {
     "node": ">=22"
@@ -64,6 +65,8 @@
     "eslint-plugin-astro": "^1.5.0",
     "eslint-plugin-react-native-a11y": "^3.5.1",
     "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
     "vitest": "^5.0.3"
   },
   "dependencies": {
@@ -72,6 +75,7 @@
     "@axe-core/playwright": "^4.13.0",
     "@babel/runtime": "^7.29.10",
     "@modelcontextprotocol/sdk": "^1.32.1",
+    "@typescript-eslint/parser": "^8.71.1",
     "ast-types-flow": "^0.0.7",
     "axe-core": "^4.14.0",
     "eslint": "^9.39.5",
@@ -79,8 +83,6 @@
     "eslint-plugin-vuejs-accessibility": "^2.6.2",
     "jsx-ast-utils": "^3.3.5",
     "playwright": "^1.64.0",
-    "typescript": "^6.0.3",
-    "typescript-eslint": "^8.71.1",
     "vue-eslint-parser": "^10.4.1",
     "zod": "^4.6.6"
   },

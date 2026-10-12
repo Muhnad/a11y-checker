@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import { parseArgs } from 'node:util';
 import { scan, type ScanOptions } from './scan.js';
 import { exceedsThreshold } from './threshold.js';
@@ -7,6 +8,10 @@ const IMPACTS: Impact[] = ['minor', 'moderate', 'serious', 'critical'];
 
 export const USAGE = `Usage: a11y-checker <target>... [options]
        a11y-checker mcp    Start the MCP server on stdio
+       a11y-checker init [dir] [--yes]
+                       Install a11y-checker and the plugins the project needs with its package manager
+       a11y-checker install-skill [--global] [--force] [--agent all|agents|claude]
+                       Copy the a11y-fix skill to .agents/skills and .claude/skills (or under ~ with --global)
 
 Targets: a URL, HTML string, HTML file, source file or directory. Pass several to scan only those.
 
@@ -15,9 +20,20 @@ Options:
   --fail-on <impact>   Exit 1 if any finding is at or above: ${IMPACTS.join(' | ')} (default: minor)
   --tags <list>        Comma-separated axe tags, e.g. wcag2aa,wcag22aa
   --wait-for <css>     Wait for this selector before auditing
+  --changed            Scan only source files changed since HEAD (plus new files); targets limit the search
   -h, --help           Show this help
 
 Exit codes: 0 = ok, 1 = findings at/above threshold, 2 = usage or runtime error`;
+
+const SCANNABLE = /\.(jsx?|tsx?|vue|astro|html?)$/i;
+
+/** Files changed since HEAD plus untracked ones, as paths relative to cwd; `pathspec` narrows the search. */
+function changedFiles(pathspec: string[]): string[] {
+  const git = (...args: string[]) =>
+    execFileSync('git', [...args, '--', ...pathspec], { encoding: 'utf8' }).split('\n').filter(Boolean);
+  const files = [...git('diff', '--name-only', '--relative', '--diff-filter=d', 'HEAD'), ...git('ls-files', '--others', '--exclude-standard')];
+  return [...new Set(files)].filter((f) => SCANNABLE.test(f));
+}
 
 export interface RunResult {
   code: number;
@@ -54,6 +70,7 @@ export async function run(
         'fail-on': { type: 'string', default: 'minor' },
         tags: { type: 'string' },
         'wait-for': { type: 'string' },
+        changed: { type: 'boolean' },
         help: { type: 'boolean', short: 'h' },
       },
     });
@@ -61,13 +78,15 @@ export async function run(
     if (values.help) return { code: 0, stdout: USAGE, stderr: '' };
 
     const failOn = values['fail-on'] as Impact;
-    if (!positionals.length || !IMPACTS.includes(failOn)) {
+    if ((!positionals.length && !values.changed) || !IMPACTS.includes(failOn)) {
       return { code: 2, stdout: '', stderr: USAGE };
     }
+    const targets = values.changed ? changedFiles(positionals) : positionals;
+    if (!targets.length) return { code: 0, stdout: format([]), stderr: '' };
 
     // Warnings go to stderr so `--json` output on stdout stays parseable.
     const warnings: string[] = [];
-    const findings = await scanFn(positionals, {
+    const findings = await scanFn(targets, {
       tags: values.tags?.split(',').map((t) => t.trim()),
       waitFor: values['wait-for'],
       onWarning: (w) => warnings.push(`Warning: ${w}`),

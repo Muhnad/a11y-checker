@@ -7,10 +7,10 @@
   - React and Next.js (JS/TS/JSX/TSX) with [eslint-plugin-jsx-a11y](https://github.com/jsx-eslint/eslint-plugin-jsx-a11y)
   - React Native with [eslint-plugin-react-native-a11y](https://github.com/FormidableLabs/eslint-plugin-react-native-a11y), the only option for React Native
   - Vue single-file components (including `<script lang="ts">`) with [eslint-plugin-vuejs-accessibility](https://github.com/vue-a11y/eslint-plugin-vuejs-accessibility)
-  - Astro (`.astro`) with the jsx-a11y rules from [eslint-plugin-astro](https://github.com/ota-meshi/eslint-plugin-astro). Optional: run `npm i -D eslint-plugin-astro` to enable it
+  - Astro (`.astro`) with the jsx-a11y rules from [eslint-plugin-astro](https://github.com/ota-meshi/eslint-plugin-astro). Optional: run `npx a11y-checker init` to enable it
   - Angular templates (`.html` and inline `template:`) with [@angular-eslint](https://github.com/angular-eslint/angular-eslint)
   - A directory scan also renders any full HTML pages it finds.
-- **Agent ready**: a CLI with `--json`, an MCP server, and a Claude skill that scans, fixes and rescans, limited to the files or directories you name.
+- **Agent ready**: a CLI with `--json`, an MCP server, an agent skill and an `AGENTS.md` block. An agent scans, fixes and rescans, limited to the files or directories you name.
 
 For frameworks without a source linter yet (Svelte, template engines such as Handlebars or EJS), scan the running app's URL. A source scan tells you when it skipped files it has no rules for, so a clean result is never silent about what it didn't check.
 
@@ -22,6 +22,8 @@ For frameworks without a source linter yet (Svelte, template engines such as Han
 npm install --save-dev a11y-checker
 npx playwright install chromium   # needed for web scans
 ```
+
+`npx a11y-checker init` does the install for you: it adds `a11y-checker` and, for an Astro project, `eslint-plugin-astro`, using the project's package manager after asking. It also offers to add the a11y instructions to `AGENTS.md`. It only prints what it would do when it isn't run in a terminal, and `--yes` skips the questions.
 
 Requires Node 22+. The Chromium download is only needed for the web engine; source scans don't use it.
 
@@ -44,6 +46,7 @@ Pass several targets to scan only those. The target decides the engine: URLs, fu
 | `--fail-on <impact>` | Exit 1 if any finding is at or above `minor`, `moderate`, `serious` or `critical` (default `minor`) |
 | `--tags <list>` | Comma-separated axe tags, e.g. `wcag2aa,wcag22aa` (web only) |
 | `--wait-for <css>` | Wait for this selector before scanning (web only) |
+| `--changed` | Scan only source files changed since `HEAD` plus new files. Targets, if given, limit the search. Fast for CI and for rescans after a fix |
 
 Exit codes: `0` ok, `1` findings at or above the threshold, `2` usage or runtime error. Notes about skipped files go to stderr as `Warning: ...`, so `--json` output stays parseable.
 
@@ -99,15 +102,45 @@ if (exceedsThreshold(findings, 'serious')) process.exit(1);
 
 ## Use with AI agents
 
-**MCP server.** Exposes `scan_page` and `explain_rule` over stdio:
+Three pieces work with any coding agent. Use any of them; none is tied to one vendor.
 
-```bash
-claude mcp add a11y-checker -- npx -y a11y-checker mcp
+- **MCP server** exposes `scan_page`, `explain_rule` and an `a11y-fix` prompt (the scan, fix, rescan, report workflow, with an optional `target` argument). Add a stdio server with the command `npx -y a11y-checker mcp`. Most clients take the JSON below, but the file it goes in and the top-level key (`mcpServers`, `servers`, ...) differ per client, so check your client's docs.
+- **Skill**, [`skills/a11y-fix/SKILL.md`](skills/a11y-fix/SKILL.md), in the open [Agent Skills](https://agentskills.io) format, teaches the same workflow. It works on the files, directories or URLs you name ("check `src/components`"), not the whole codebase unless you ask.
+- **`AGENTS.md`**, the file most agents read for project instructions, tells the agent to scan after UI changes.
+
+```json
+{
+  "mcpServers": {
+    "a11y-checker": { "command": "npx", "args": ["-y", "a11y-checker", "mcp"] }
+  }
+}
 ```
 
-For other clients, use the command `npx -y a11y-checker mcp` in their MCP config.
+```bash
+npx a11y-checker init                 # installs a11y-checker, then offers to add the a11y block to AGENTS.md
+npx a11y-checker install-skill        # skill into .agents/skills and .claude/skills of this project
+npx a11y-checker install-skill --global                # ... or ~/.agents/skills and ~/.claude/skills
+npx a11y-checker install-skill --agent agents          # only the cross-client .agents/skills (or --agent claude)
+```
 
-**Skill.** [`skills/a11y-fix/SKILL.md`](skills/a11y-fix/SKILL.md) teaches an agent to scan, fix, rescan and report what needs a human. It works on the files, directories or URLs you name ("check `src/components`"), not the whole codebase unless you ask. Copy the `a11y-fix` folder to `~/.claude/skills/` (or `.claude/skills/` in a project). The repo is also a Claude Code plugin (`.claude-plugin/plugin.json`).
+`init` and `install-skill` ask before writing and never overwrite your files: `init` only edits the marked block it owns in `AGENTS.md` (and prints the text instead when it isn't run in a terminal), and `install-skill` refuses to replace an existing install unless you pass `--force`.
+
+How agents pick these up:
+
+| Agent | Skill | `AGENTS.md` |
+| --- | --- | --- |
+| Claude Code | `.claude/skills` (`install-skill`) or the plugin below | Add `@AGENTS.md` to `CLAUDE.md` |
+| Codex, Cursor and other [Agent Skills](https://agentskills.io) clients | `.agents/skills` (`install-skill`) | Read natively |
+| Gemini CLI | `.agents/skills` | Set `context.fileName` to `["AGENTS.md"]` in `.gemini/settings.json` |
+| Aider | n/a, use the MCP prompt | Add `read: AGENTS.md` to `.aider.conf.yml` |
+| Any other MCP client | n/a, use the `a11y-fix` prompt | See your client's docs |
+
+**Claude Code plugin** (skill and MCP server together):
+
+```
+/plugin marketplace add Muhnad/a11y-checker
+/plugin install a11y-checker@a11y-checker
+```
 
 ## Limits
 
@@ -116,7 +149,7 @@ For other clients, use the command `npx -y a11y-checker mcp` in their MCP config
 - The source engine doesn't check Next.js `<Image>` alt text. The web engine does.
 - Angular templates are linted with `@angular-eslint`'s accessibility rules. They can't see content that only exists at runtime; scan the running app too.
 - Source scanning skips file types it has no rules for (for example `.svelte`, `.hbs`, `.ejs`) and says so with a warning. The warning comes through the CLI's stderr, as an extra block after the findings in the MCP result, and through `onWarning` in `scan()`.
-- `eslint-plugin-astro` is an optional peer dependency, not installed by default: the releases that work with ESLint 9 depend on a package (`braces`) with an unpatched advisory, and we don't want it in every install. Install it only if you scan Astro code.
+- `eslint-plugin-astro` is an optional peer dependency, not installed by default: the releases that work with ESLint 9 depend on a package (`braces`) with an unpatched advisory, and we don't want it in every install. Install it only if you scan Astro code: `npx a11y-checker init` adds it, and `a11y-checker` itself, to the project (it finds the right package manager from the lockfile and asks first). The plugin is looked up from the scanned directory, so a bare `npx a11y-checker` finds it too.
 - Rules are axe-core's and the two ESLint plugins'; see [axe rules](https://github.com/dequelabs/axe-core/blob/develop/doc/rule-descriptions.md).
 
 ## Migrating from v2
