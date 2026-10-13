@@ -1,0 +1,12 @@
+{
+  "name": "a11y-checker",
+  "owner": { "name": "Muhannad Abdelrazek" },
+  "metadata": { "description": "Accessibility scanner for humans and AI agents." },
+  "plugins": [
+    {
+      "name": "a11y-checker",
+      "source": "./",
+      "description": "Scan and fix accessibility problems in web apps and source code: a11y-fix skill plus MCP server."
+    }
+  ]
+}

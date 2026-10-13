@@ -1,15 +1,40 @@
 {
   "name": "a11y-checker",
-  "version": "2.2.1",
-  "description": "Identifies accessibility issues in your code.",
-  "main": "./src/a11y.js",
+  "version": "3.0.0-alpha.0",
+  "description": "Accessibility scanner for humans and AI agents: CLI, MCP server and skill that return structured, fixable findings.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    }
+  },
+  "bin": {
+    "a11y-checker": "./dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "skills"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
-    "start": "npm-run-all --parallel dev:server lint:watch",
-    "dev:server": "webpack-dev-server --hot --inline",
-    "watch": "webpack -w -d",
-    "build": "webpack -p",
-    "lint": "node_modules/.bin/esw webpack.config.* src --color",
-    "lint:watch": "npm run lint -- --watch"
+    "build": "tsup",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "pretest": "npm run build",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude 'test/**/*.integration-test.ts'"
   },
   "repository": {
     "type": "git",
@@ -21,22 +46,57 @@
   "keywords": [
     "a11y",
     "accessibility",
-    "developers",
-    "tool",
-    "testing",
-    "report"
+    "wcag",
+    "axe-core",
+    "mcp",
+    "ai-agents",
+    "react",
+    "angular",
+    "vue",
+    "astro",
+    "nextjs",
+    "react-native"
   ],
   "author": "Muhannad Abdelrazek",
   "license": "MIT",
   "devDependencies": {
-    "babel-core": "^6.24.1",
-    "babel-eslint": "^7.2.3",
-    "babel-loader": "^6.4.1",
-    "babel-preset-es2015": "^6.24.1",
-    "eslint": "^3.19.0",
-    "eslint-watch": "^2.1.14",
-    "npm-run-all": "^4.0.2",
-    "webpack": "^2.4.1",
-    "webpack-dev-server": "^2.4.2"
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^26.6.5",
+    "eslint-plugin-astro": "^1.5.0",
+    "eslint-plugin-react-native-a11y": "^3.5.1",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.71.1",
+    "vitest": "^5.0.3"
+  },
+  "dependencies": {
+    "@angular-eslint/eslint-plugin-template": "^22.6.0",
+    "@angular-eslint/template-parser": "^22.6.0",
+    "@axe-core/playwright": "^4.13.0",
+    "@babel/runtime": "^7.29.10",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@typescript-eslint/parser": "^8.71.1",
+    "ast-types-flow": "^0.0.7",
+    "axe-core": "^4.14.0",
+    "eslint": "^9.39.5",
+    "eslint-plugin-jsx-a11y": "^6.10.2",
+    "eslint-plugin-vuejs-accessibility": "^2.6.2",
+    "jsx-ast-utils": "^3.3.5",
+    "playwright": "^1.64.0",
+    "vue-eslint-parser": "^10.4.1",
+    "zod": "^4.6.6"
+  },
+  "peerDependencies": {
+    "eslint-plugin-astro": "^1.5.0"
+  },
+  "peerDependenciesMeta": {
+    "eslint-plugin-astro": {
+      "optional": true
+    }
+  },
+  "overrides": {
+    "eslint-plugin-react-native-a11y": {
+      "eslint": "$eslint"
+    }
   }
 }
