@@ -1,4 +1,5 @@
-export type Impact = 'minor' | 'moderate' | 'serious' | 'critical';
+export const IMPACTS = ['minor', 'moderate', 'serious', 'critical'] as const;
+export type Impact = (typeof IMPACTS)[number];
 
 export type EngineName = 'web' | 'source';
 

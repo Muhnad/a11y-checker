@@ -1,9 +1,7 @@
-import type { Finding, Impact } from './types.js';
+import { IMPACTS, type Finding, type Impact } from './types.js';
 
-const ORDER: Impact[] = ['minor', 'moderate', 'serious', 'critical'];
+const severity = (impact: Impact) => IMPACTS.indexOf(impact);
 
 /** True when any finding is at or above the `failOn` impact. */
-export function exceedsThreshold(findings: Finding[], failOn: Impact): boolean {
-  const min = ORDER.indexOf(failOn);
-  return findings.some((f) => ORDER.indexOf(f.impact) >= min);
-}
+export const exceedsThreshold = (findings: Finding[], failOn: Impact): boolean =>
+  findings.some((f) => severity(f.impact) >= severity(failOn));
