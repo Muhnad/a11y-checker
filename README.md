@@ -25,7 +25,7 @@ npx playwright install chromium   # needed for web scans
 
 `npx a11y-checker init` does the install for you: it adds `a11y-checker` and, for an Astro project, `eslint-plugin-astro`, using the project's package manager after asking. It also offers to add the a11y instructions to `AGENTS.md`. It only prints what it would do when it isn't run in a terminal, and `--yes` skips the questions.
 
-Requires Node 22+. The Chromium download is only needed for the web engine; source scans don't use it.
+Requires Node 22+. The Chromium download is only needed for the web engine (URLs, HTML files and strings, and full HTML pages found in a directory scan); a scan of source code alone doesn't use it.
 
 ## CLI
 
@@ -66,7 +66,7 @@ Each finding looks like this:
 }
 ```
 
-Source findings have `file` and `line` instead of `selector` and `html`.
+Source findings have `file` and `line` instead of `selector` and `html`. Web findings also carry `url` (the page scanned) or, for a local HTML file, `file`, so a multi-page scan stays readable.
 
 ## Frameworks
 
@@ -123,7 +123,7 @@ npx a11y-checker install-skill --global                # ... or ~/.agents/skills
 npx a11y-checker install-skill --agent agents          # only the cross-client .agents/skills (or --agent claude)
 ```
 
-`init` and `install-skill` ask before writing and never overwrite your files: `init` only edits the marked block it owns in `AGENTS.md` (and prints the text instead when it isn't run in a terminal), and `install-skill` refuses to replace an existing install unless you pass `--force`.
+`init` asks before installing or writing anything (and only prints what it would do when it isn't run in a terminal); in `AGENTS.md` it appends or replaces just its own marked block. `install-skill` doesn't ask: it writes the skill folders, and refuses to replace an existing install unless you pass `--force`. With `--global` it writes under your home directory.
 
 How agents pick these up:
 
@@ -145,6 +145,7 @@ How agents pick these up:
 ## Limits
 
 - Automated checks find only part of the problems. Do a keyboard and screen reader pass too.
+- Source scans skip test files (`*.test.*`, `*.spec.*`, `__tests__`, `__mocks__`) and don't run `react-native-a11y/has-accessibility-hint`, which flags nearly every React Native element.
 - Source findings carry no WCAG tags and are all reported as `serious`, because the ESLint rules don't provide them.
 - The source engine doesn't check Next.js `<Image>` alt text. The web engine does.
 - Angular templates are linted with `@angular-eslint`'s accessibility rules. They can't see content that only exists at runtime; scan the running app too.

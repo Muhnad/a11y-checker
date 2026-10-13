@@ -1,8 +1,14 @@
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vitest';
-import { addAgentsBlock, plan } from '../src/init.js';
+import { spawnSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
+import { describe, expect, it, vi } from 'vitest';
+import { addAgentsBlock, init, plan } from '../src/init.js';
+
+// The package manager is the boundary: no test should really install anything.
+vi.mock('node:child_process', () => ({ spawnSync: vi.fn() }));
+const installReturns = (result: object) => vi.mocked(spawnSync).mockReturnValue(result as ReturnType<typeof spawnSync>);
 
 const project = (pkg: object, lockfile?: string) => {
   const dir = mkdtempSync(join(tmpdir(), 'a11y-init-'));
@@ -66,5 +72,43 @@ describe('addAgentsBlock', () => {
     expect(text).toMatch(/^before\n\n/);
     expect(text).toMatch(/\n\nafter\n$/);
     expect(text).not.toContain('old');
+  });
+});
+
+describe('addAgentsBlock with a broken marker', () => {
+  it('refuses a start marker without its end marker instead of adding a second block', () => {
+    const dir = project({});
+    writeFileSync(join(dir, 'AGENTS.md'), '<!-- a11y-checker:start -->\nhalf\n');
+
+    expect(() => addAgentsBlock(dir)).toThrow(/without/);
+  });
+});
+
+describe('init when the install fails', () => {
+  const quietly = () => vi.spyOn(console, 'log').mockImplementation(() => {});
+
+  it('throws and writes no AGENTS.md when the package manager cannot be run', async () => {
+    quietly();
+    installReturns({ error: new Error('spawn npm ENOENT'), status: null });
+    const dir = project({});
+
+    await expect(init(dir, true)).rejects.toThrow(/Could not run npm/);
+    expect(existsSync(join(dir, 'AGENTS.md'))).toBe(false);
+  });
+
+  it('returns the package manager exit code and writes no AGENTS.md when it fails', async () => {
+    quietly();
+    installReturns({ status: 1 });
+    const dir = project({});
+
+    expect(await init(dir, true)).toBe(1);
+    expect(existsSync(join(dir, 'AGENTS.md'))).toBe(false);
+  });
+
+  it('fails when the package manager is killed by a signal', async () => {
+    quietly();
+    installReturns({ status: null, signal: 'SIGKILL' });
+
+    expect(await init(project({}), true)).toBe(1);
   });
 });

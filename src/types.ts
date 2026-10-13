@@ -15,7 +15,9 @@ export interface Finding {
   fixHint: string;
   /** `web`: CSS selector of the offending element. */
   selector?: string;
-  /** `source`: location of the offending code. */
+  /** `web`: the page a URL target was loaded from, so findings from several pages can be told apart. */
+  url?: string;
+  /** `source`, or `web` for a local HTML file: location of the offending code. */
   file?: string;
   line?: number;
   /** `web`: HTML snippet of the offending element. */

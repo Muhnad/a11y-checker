@@ -33,7 +33,9 @@ if (args[0] === 'mcp') {
   }
 } else {
   const { code, stdout, stderr } = await run(args);
-  if (stdout) console.log(stdout);
-  if (stderr) console.error(stderr);
+  // process.exit() would cut off output still queued on a pipe (it truncates at 64 KiB), so wait for each write.
+  const write = (stream: NodeJS.WriteStream, text: string) => new Promise((done) => stream.write(`${text}\n`, done));
+  if (stdout) await write(process.stdout, stdout);
+  if (stderr) await write(process.stderr, stderr);
   process.exit(code);
 }

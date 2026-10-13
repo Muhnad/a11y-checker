@@ -48,6 +48,17 @@ describe('a11y-checker binary', () => {
     expect(existsSync(join(cwd, 'AGENTS.md'))).toBe(false);
   });
 
+  it('prints all of a large --json report through a pipe', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'a11y-big-'));
+    writeFileSync(join(dir, 'Big.jsx'), `export const B = () => (\n<>\n${'<img src="a.png" />\n'.repeat(400)}</>\n);\n`);
+
+    const { status, stdout } = spawnSync('node', [bin, dir, '--json'], { encoding: 'utf8', maxBuffer: 1 << 26 });
+
+    expect(stdout.length).toBeGreaterThan(65536);
+    expect(JSON.parse(stdout)).toHaveLength(400);
+    expect(status).toBe(1);
+  });
+
   describe('--changed', () => {
     const repo = () => {
       const cwd = mkdtempSync(join(tmpdir(), 'a11y-changed-'));
@@ -74,6 +85,25 @@ describe('a11y-checker binary', () => {
       expect(stdout).toContain('Edited.jsx');
       expect(stdout).toContain('New.jsx');
       expect(stdout).not.toContain('Old.jsx');
+    });
+
+    it('scans files whose names have spaces or accents', () => {
+      const { cwd, jsx, bad } = repo();
+      writeFileSync(join(cwd, 'Café menü.jsx'), jsx(bad));
+      writeFileSync(join(cwd, 'my page.jsx'), jsx(bad));
+
+      const { status, stdout } = changed(cwd);
+
+      expect(status).toBe(1);
+      expect(stdout).toContain('Café menü.jsx');
+      expect(stdout).toContain('my page.jsx');
+    });
+
+    it('prints an empty JSON array with --json when nothing changed', () => {
+      const { status, stdout } = spawnSync('node', [bin, '--changed', '--json'], { encoding: 'utf8', cwd: repo().cwd });
+
+      expect(status).toBe(0);
+      expect(JSON.parse(stdout)).toEqual([]);
     });
 
     it('exits 0 when nothing changed', () => {

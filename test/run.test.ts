@@ -100,6 +100,12 @@ describe('run', () => {
     expect(stdout).toContain('[critical] image-alt  public/page.html img');
   });
 
+  it('prints the page URL with the selector for a finding from a remote page', async () => {
+    const { stdout } = await run(['https://example.com/about'], scanReturning({ ...finding('critical'), url: 'https://example.com/about' }));
+
+    expect(stdout).toContain('[critical] image-alt  https://example.com/about img');
+  });
+
   it('puts scan warnings on stderr and keeps stdout parseable JSON', async () => {
     const scan = vi.fn().mockImplementation(async (_targets: string[], opts: { onWarning?: (m: string) => void }) => {
       opts.onWarning?.('Skipped files with no source rules (1 .svelte).');

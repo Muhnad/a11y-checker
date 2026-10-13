@@ -42,6 +42,7 @@ export function addAgentsBlock(dir: string): string {
   const file = join(dir, 'AGENTS.md');
   const text = existsSync(file) ? readFileSync(file, 'utf8') : '';
   const [from, to] = [text.indexOf(START), text.indexOf(END)];
+  if (from >= 0 && to < from) throw new Error(`${file} has "${START}" without "${END}": fix or remove it, then run init again.`);
   const gap = !text || text.endsWith('\n\n') ? '' : text.endsWith('\n') ? '\n' : '\n\n';
   const next = from >= 0 && to > from ? text.slice(0, from) + BLOCK.trimEnd() + text.slice(to + END.length) : text + gap + BLOCK;
   writeFileSync(file, next);
@@ -67,8 +68,9 @@ export async function init(dir: string, yes: boolean): Promise<number> {
     console.log(`Install: ${argv.join(' ')}`);
     if (await approve('Run it?', yes)) {
       // shell on Windows, where the package managers are .cmd shims.
-      const { status } = spawnSync(argv[0]!, argv.slice(1), { cwd: dir, stdio: 'inherit', shell: process.platform === 'win32' });
-      if (status) return status;
+      const { status, error } = spawnSync(argv[0]!, argv.slice(1), { cwd: dir, stdio: 'inherit', shell: process.platform === 'win32' });
+      if (error) throw new Error(`Could not run ${argv[0]}: ${error.message}`);
+      if (status !== 0) return status ?? 1; // null: killed by a signal
     }
   }
   if (await approve('Add a11y-checker instructions to AGENTS.md (read by most coding agents)?', yes)) {

@@ -17,7 +17,7 @@ export interface WebOptions {
   waitFor?: string;
 }
 
-/** Scan one or more pages with a single browser. Findings from local files carry `file`. */
+/** Scan one or more pages with a single browser. Findings carry `file` for a local file and `url` for any other URL. */
 export async function scanWeb(targets: WebTarget | WebTarget[], opts: WebOptions = {}): Promise<Finding[]> {
   const browser = await chromium.launch();
   try {
@@ -31,9 +31,13 @@ export async function scanWeb(targets: WebTarget | WebTarget[], opts: WebOptions
 
       let axe = new AxeBuilder({ page });
       if (opts.tags?.length) axe = axe.withTags(opts.tags);
-      const file =
-        'url' in target && target.url.startsWith('file:') ? relative(process.cwd(), fileURLToPath(target.url)) : undefined;
-      findings.push(...toFindings((await axe.analyze()).violations).map((f) => (file ? { ...f, file } : f)));
+      const origin =
+        'url' in target
+          ? target.url.startsWith('file:')
+            ? { file: relative(process.cwd(), fileURLToPath(target.url)) }
+            : { url: target.url }
+          : {};
+      findings.push(...toFindings((await axe.analyze()).violations).map((f) => ({ ...f, ...origin })));
       await page.close();
     }
     return findings;

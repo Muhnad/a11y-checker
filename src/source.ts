@@ -7,6 +7,12 @@ import type { ESLint, Linter } from 'eslint';
 import { listFiles, htmlDocuments, SKIP_DIRS } from './files.js';
 import type { Finding } from './types.js';
 
+// Tests and mocks are not shipped UI, so findings in them are noise.
+const TEST_FILES = ['**/*.{test,spec}.*', '**/__tests__/**', '**/__mocks__/**'];
+
+// `accessibilityHint` is optional guidance, not a failure; requiring it buries the real findings.
+const RN_SKIP = new Set(['has-accessibility-hint']);
+
 const RN_DOCS = 'https://github.com/FormidableLabs/eslint-plugin-react-native-a11y';
 
 // Template formats we have no source rules for. A scan must say so instead of reporting a clean result.
@@ -78,7 +84,7 @@ const NG_RULES = [
  */
 async function makeConfig(files: string[], astroConfigs: Linter.Config[]): Promise<Linter.Config[]> {
   const has = (re: RegExp) => files.some((f) => re.test(f));
-  const config: Linter.Config[] = [{ ignores: SKIP_DIRS.map((d) => `**/${d}/**`) }];
+  const config: Linter.Config[] = [{ ignores: [...SKIP_DIRS.map((d) => `**/${d}/**`), ...TEST_FILES] }];
   // Angular inline templates live in .component.ts files, which are also TypeScript.
   const needsParser = has(/\.(jsx?|tsx?|vue)$/i);
   const tsParser = needsParser ? ((await import('@typescript-eslint/parser')) as { default: Linter.Parser }).default : undefined;
@@ -88,7 +94,11 @@ async function makeConfig(files: string[], astroConfigs: Linter.Config[]): Promi
       import('eslint-plugin-jsx-a11y'),
       import('eslint-plugin-react-native-a11y'),
     ]);
-    const rnRules = Object.fromEntries(Object.keys(rnA11y.configs.all.rules).map((id) => [id, 'error'])) as Linter.RulesRecord;
+    const rnRules = Object.fromEntries(
+      Object.keys(rnA11y.configs.all.rules)
+        .filter((id) => !RN_SKIP.has(id.replace('react-native-a11y/', '')))
+        .map((id) => [id, 'error']),
+    ) as Linter.RulesRecord;
     config.push(
       { files: ['**/*.{js,jsx,ts,tsx}'], languageOptions: { parser: tsParser, parserOptions: { ecmaFeatures: { jsx: true } } } },
       // Astro files get the wrapped astro/jsx-a11y rules below instead.
@@ -124,6 +134,12 @@ async function makeConfig(files: string[], astroConfigs: Linter.Config[]): Promi
   return config;
 }
 
+// Relative to the working directory, unless the file lies outside it: `../../x` is no use to someone else.
+const shortPath = (file: string) => {
+  const rel = relative(process.cwd(), file);
+  return rel.startsWith('..') ? file : rel;
+};
+
 /** Lint a source file or directory (JS/JSX/TS/TSX, Vue, Astro, Angular templates, HTML fragments) with the a11y rules. */
 export async function scanSource(path: string, onWarning: OnWarning = () => {}): Promise<Finding[]> {
   const isDir = statSync(path).isDirectory();
@@ -146,6 +162,9 @@ export async function scanSource(path: string, onWarning: OnWarning = () => {}):
   // For a file with no matching config ESLint returns only a "File ignored" warning; that is not a finding.
   const unmatched = (r: ESLint.LintResult) => r.messages.length > 0 && r.messages.every((m) => !m.ruleId && !m.fatal);
   const linted = (await eslint.lintFiles([isDir ? '.' : basename(path)])).filter((r) => !unmatched(r));
+  // The project's own `eslint-disable` comments can name rules from plugins we do not load; that is not a finding.
+  // Other rule-less messages (unused directives and the like) are not findings either; only a parse failure is.
+  const ours = (m: Linter.LintMessage) => (m.ruleId || m.fatal) && !/^Definition for rule .* was not found/.test(m.message);
   const results = linted.filter((r) => !pages.has(r.filePath));
   let skipped = warnSkipped(files, onWarning);
   if (astroFiles.length && !astroConfigs) {
@@ -154,11 +173,11 @@ export async function scanSource(path: string, onWarning: OnWarning = () => {}):
     );
     skipped = true;
   }
-  if (!linted.length && !skipped) onWarning(`No files with source rules found in ${relative(process.cwd(), path) || '.'}.`);
+  if (!linted.length && !skipped) onWarning(`No files with source rules found in ${relative(process.cwd(), path) || '.'} (test, spec and mock files are ignored).`);
   const meta = eslint.getRulesMetaForResults(results);
 
   return results.flatMap((r) =>
-    r.messages.map((m): Finding => {
+    r.messages.filter(ours).map((m): Finding => {
       const ruleId = m.ruleId ?? 'parse-error';
       const helpUrl = meta[ruleId]?.docs?.url ?? (ruleId.startsWith('react-native-a11y/') ? RN_DOCS : '');
       return {
@@ -172,7 +191,7 @@ export async function scanSource(path: string, onWarning: OnWarning = () => {}):
         helpUrl,
         // The plugins' messages already say what to change.
         fixHint: m.message,
-        file: relative(process.cwd(), r.filePath),
+        file: shortPath(r.filePath),
         line: m.line,
       };
     }),

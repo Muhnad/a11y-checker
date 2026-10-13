@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
@@ -20,6 +21,12 @@ describe('MCP server', () => {
     const [first, ...rest] = result.content as { text: string }[];
     return { isError: result.isError, text: first?.text ?? '', warnings: rest.map((b) => b.text) };
   };
+
+  it('reports the version from package.json', () => {
+    const { version } = JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8'));
+
+    expect(client.getServerVersion()?.version).toBe(version);
+  });
 
   it('lists scan_page and explain_rule', async () => {
     const { tools } = await client.listTools();

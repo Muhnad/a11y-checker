@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { describe, expect, it } from 'vitest';
+import { createServer } from 'node:http';
+import type { AddressInfo } from 'node:net';
+import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { scan } from '../src/index.js';
 
 const fixture = (name: string) => new URL(`./fixtures/${name}`, import.meta.url).pathname;
@@ -38,5 +40,26 @@ describe('scan', () => {
 
   it('rejects a target that is not a URL, an HTML file or HTML', async () => {
     await expect(scan('definitely-not-a-file')).rejects.toThrow('Unsupported target');
+  });
+});
+
+describe('scan (several URLs)', () => {
+  const pages: Record<string, string> = {
+    '/good': readFileSync(fixture('good.html'), 'utf8'),
+    '/bad': readFileSync(fixture('bad.html'), 'utf8'),
+  };
+  const server = createServer((req, res) => res.end(pages[req.url ?? ''] ?? ''));
+  let base: string;
+  beforeAll(async () => {
+    await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+    base = `http://127.0.0.1:${(server.address() as AddressInfo).port}`;
+  });
+  afterAll(() => server.close());
+
+  it('tells which page each finding came from', async () => {
+    const findings = await scan([`${base}/good`, `${base}/bad`]);
+
+    expect(findings.length).toBeGreaterThan(0);
+    expect(new Set(findings.map((f) => f.url))).toEqual(new Set([`${base}/bad`]));
   });
 });

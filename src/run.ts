@@ -29,9 +29,10 @@ const SCANNABLE = /\.(jsx?|tsx?|vue|astro|html?)$/i;
 
 /** Files changed since HEAD plus untracked ones, as paths relative to cwd; `pathspec` narrows the search. */
 function changedFiles(pathspec: string[]): string[] {
+  // -z: names come back NUL-separated and unquoted, so accented or spaced file names survive.
   const git = (...args: string[]) =>
-    execFileSync('git', [...args, '--', ...pathspec], { encoding: 'utf8' }).split('\n').filter(Boolean);
-  const files = [...git('diff', '--name-only', '--relative', '--diff-filter=d', 'HEAD'), ...git('ls-files', '--others', '--exclude-standard')];
+    execFileSync('git', [...args, '--', ...pathspec], { encoding: 'utf8' }).split('\0').filter(Boolean);
+  const files = [...git('diff', '-z', '--name-only', '--relative', '--diff-filter=d', 'HEAD'), ...git('ls-files', '-z', '--others', '--exclude-standard')];
   return [...new Set(files)].filter((f) => SCANNABLE.test(f));
 }
 
@@ -45,7 +46,7 @@ function format(findings: Finding[]): string {
   if (!findings.length) return 'No accessibility issues found.';
   const lines = findings.map((f) =>
     [
-      `[${f.impact}] ${f.ruleId}  ${f.selector ? [f.file, f.selector].filter(Boolean).join(' ') : `${f.file}:${f.line}`}`,
+      `[${f.impact}] ${f.ruleId}  ${f.selector ? [f.file ?? f.url, f.selector].filter(Boolean).join(' ') : `${f.file}:${f.line}`}`,
       `  ${f.message}`,
       f.fixHint !== f.message && `  Fix: ${f.fixHint}`,
       f.helpUrl && `  ${f.helpUrl}`,
@@ -82,7 +83,7 @@ export async function run(
       return { code: 2, stdout: '', stderr: USAGE };
     }
     const targets = values.changed ? changedFiles(positionals) : positionals;
-    if (!targets.length) return { code: 0, stdout: format([]), stderr: '' };
+    if (!targets.length) return { code: 0, stdout: values.json ? '[]' : format([]), stderr: '' };
 
     // Warnings go to stderr so `--json` output on stdout stays parseable.
     const warnings: string[] = [];

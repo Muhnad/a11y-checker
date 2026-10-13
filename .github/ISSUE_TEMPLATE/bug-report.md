@@ -25,4 +25,5 @@ What you expected instead (for example, the rule or finding you expected, or non
 - a11y-checker version:
 - Node version:
 - OS:
-- Framework (React, Next.js, React Native, other):
+- Framework (React, Next.js, React Native, Vue, Angular, Astro, plain HTML, other):
+- Agent or MCP client, if you used one (Claude Code, Cursor, Codex, ...):

@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import axe from 'axe-core';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { z } from 'zod';
@@ -15,13 +16,13 @@ const text = (value: unknown, isError = false, warnings: string[] = []) => ({
 });
 
 export function createServer(): McpServer {
-  const server = new McpServer({ name: 'a11y-checker', version: '3.0.0' });
+  const server = new McpServer({ name: 'a11y-checker', version: JSON.parse(readFileSync(new URL('../package.json', import.meta.url), 'utf8')).version as string });
 
   server.registerTool(
     'scan_page',
     {
       description:
-        'Scan for accessibility problems and return structured findings. target is a URL, an HTML file or string (rendered in Chromium with axe-core), or a source file/directory (React, Next.js, React Native, Angular templates, HTML; linted). Pass only the files or directories the user asked about. Each finding has ruleId, impact, fixHint and a selector (web) or file and line (source).',
+        'Scan for accessibility problems and return structured findings. target is a URL, an HTML file or string (rendered in Chromium with axe-core), or a source file/directory (React, Next.js, React Native, Angular templates, HTML; linted). Pass only the files or directories the user asked about. Each finding has ruleId, impact, fixHint and a selector and the page url (web) or file and line (source).',
       inputSchema: {
         target: z
           .union([z.string(), z.array(z.string()).min(1)])
