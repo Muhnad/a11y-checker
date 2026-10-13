@@ -1,6 +1,6 @@
 {
   "name": "a11y-checker",
-  "version": "3.0.0-alpha.0",
+  "version": "3.0.0",
   "description": "Accessibility scanner for humans and AI agents: CLI, MCP server and skill that return structured, fixable findings.",
   "type": "module",
   "main": "./dist/index.cjs",
